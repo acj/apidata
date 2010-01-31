@@ -103,9 +103,20 @@ def subcomm_appropriations():
 
     return subcommittees + '\n'
 
+def comm_armedservices():
+    page = urllib2.urlopen("http://armedservices.house.gov/list_of_members.shtml")
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Armed Services"', '"HSAS"']
+    memberlist = soup.find('div', align='center')
+    for member in memberlist.findAll('a'):
+        atag = member.find('span')
+        if atag == None:
+            atag = member.find('font') # Correct for html error
+        comma_idx = atag.contents[0].find(',')
+        members.append('"' + atag.contents[0][:comma_idx] + '"')
+    return ', '.join(members) + '\n'
 
-
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations]
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices]
 
 for t in tasks:
     print t(),

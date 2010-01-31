@@ -116,7 +116,43 @@ def comm_armedservices():
         members.append('"' + atag.contents[0][:comma_idx] + '"')
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices]
+def subcomm_armedservices():
+    def parse_members(name, shortname, tbody):
+        name_prefix = '"House Committee on Armed Services/'
+        members = [name_prefix + name + '"', '"' + shortname + '"']
+        names = tbody.findAll('span')
+        for name in names:
+            # Two common errors: an extra font tag, and an extra span tag
+            font_tag = name.find('font')
+            span_tag = name.find('span')
+            if font_tag != None:
+                name = font_tag
+            elif span_tag != None:
+                name = span_tag
+            if len(name.contents) == 0:
+                continue
+            clean_name = str(name.contents[0]).replace('Chairman ', '').replace('Ranking Member ', '')
+            commapos = clean_name.find(',')
+            if commapos == -1:
+                continue
+            members.append('"' + clean_name[:commapos] + '"')
+        return members
+
+    page = urllib2.urlopen("http://armedservices.house.gov/subcommittee.shtml")
+    soup = BeautifulSoup(page)
+    all_members = ''
+    subcomms = soup.findAll('tbody')
+    all_members += ', '.join(parse_members('Subcommittee on Readiness', 'HSAS_rdi', subcomms[1])) + '\n'
+    all_members += ', '.join(parse_members('Subcommittee on Seapower and Expeditionary Forces', 'HSAS_sea', subcomms[2])) + '\n'
+    all_members += ', '.join(parse_members('Subcommittee on Air and Land Forces', 'HSAS_alf', subcomms[3])) + '\n'
+    all_members += ', '.join(parse_members('Subcommittee on Oversight and Investigations', 'HSAS_osi', subcomms[4])) + '\n'
+    all_members += ', '.join(parse_members('Subcommittee on Terrorism, Unconventional Threats and Capabilities', 'HSAS_ter', subcomms[5])) + '\n'
+    all_members += ', '.join(parse_members('Subcommittee on Strategic Forces', 'HSAS_stf', subcomms[6])) + '\n'
+    all_members += ', '.join(parse_members('Subcommittee on Military Personnel', 'HSAS_mip', subcomms[7])) + '\n'
+
+    return all_members
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices]
 
 for t in tasks:
     print t(),

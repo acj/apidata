@@ -152,7 +152,18 @@ def subcomm_armedservices():
 
     return all_members
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices]
+def comm_budget():
+    page = urllib2.urlopen("http://budget.house.gov/members.shtml")
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Budget"', '"HSBU"']
+    lists = soup.findAll('ol')
+    for lst in lists:
+        for member in lst.findAll('a'):
+            name = str(member.contents[0]).strip()
+            members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices,comm_budget]
 
 for t in tasks:
     print t(),

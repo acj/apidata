@@ -163,7 +163,19 @@ def comm_budget():
             members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices,comm_budget]
+def comm_edlabor():
+    page = urllib2.urlopen("http://edlabor.house.gov/about/members/")
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Education and Labor"', '"HSED"']
+    lists = soup.find('div', 'page-asset asset')
+    listitems = lists.findAll('li')
+    for lst in listitems:
+        name = lst.find('a').contents[0]
+        name = name.replace('"', '\\"')
+        members.append('"' + name.replace(', Chairman', '') + '"')
+    return ', '.join(members) + '\n'
+        
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices,comm_budget,comm_edlabor]
 
 for t in tasks:
     print t(),

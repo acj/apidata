@@ -174,8 +174,43 @@ def comm_edlabor():
         name = name.replace('"', '\\"')
         members.append('"' + name.replace(', Chairman', '') + '"')
     return ', '.join(members) + '\n'
-        
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices,comm_budget,comm_edlabor]
+
+def subcomm_edlabor():
+    page = urllib2.urlopen("http://edlabor.house.gov/about/members/")
+    soup = BeautifulSoup(page)
+    tables = soup.findAll('table', width='100%')
+    member_string = ''
+
+    def parse_names(subcomm, shortname, table):
+        members = ['"' + subcomm + '"', '"' + shortname + '"']    
+        names = table.findAll('td')
+        for name in names:
+            n = str(name.contents[0]).replace('"', '\\"')
+            if n.find('Democrats') != -1 or n.find('Republicans') != -1:
+                continue
+            if n == '<br />':
+                continue
+            members.append('"' + n.replace(',', '').strip() + '"')
+        return members
+
+    # Early Childhood, Elementary, Secondary Ed
+    member_string += ', '.join(parse_names('Subcommittee on Early Childhood, Elementary and Secondary Education', 'HSED_kid', tables[0])) + '\n'
+
+    # Healthy Families and Communities
+    member_string += ', '.join(parse_names('Subcommittee on Healthy Families and Communities', 'HSED_hfc', tables[1])) + '\n'
+
+    # Higher Education, Lifelong Learning and Competitiveness
+    member_string += ', '.join(parse_names('Subcommittee on Higher Education, Lifelong Learning and Competitiveness', 'HSED_hed', tables[2])) + '\n'
+
+    # Health, Employment, Labor, and Pensions
+    member_string += ', '.join(parse_names('Subcommittee on Health, Employment, Labor, and Pensions', 'HSED_hel', tables[3])) + '\n'
+
+    # Workforce Protections
+    member_string += ', '.join(parse_names('Subcommittee on Workforce Protections', 'HSED_wfp', tables[4])) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices,comm_budget,comm_edlabor,subcomm_edlabor]
 
 for t in tasks:
     print t(),

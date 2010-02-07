@@ -210,7 +210,64 @@ def subcomm_edlabor():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations,comm_armedservices,subcomm_armedservices,comm_budget,comm_edlabor,subcomm_edlabor]
+def comm_energycommerce():
+    page = urllib2.urlopen("http://energycommerce.house.gov/index.php?option=com_content&view=category&layout=blog&id=160&Itemid=61")
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Energy and Commerce"', '"HSIF"']
+    lists = soup.find('tbody')
+    listitems = lists.findAll('td')
+    for lst in listitems:
+        name = str(lst.contents[0])
+        if name == ' ':
+            continue
+        comma_pos = name.find(',')
+        if comma_pos == -1:
+            continue
+        else:
+            members.append('"' + name[:comma_pos] + '"')
+    return ', '.join(members) + '\n'
+
+def subcomm_energycommerce():
+    def parse_names(url, subcomm, shortname):
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        members = ['"' + subcomm + '"', '"' + shortname + '"']    
+        tbody = soup.find('tbody')
+        listitems = tbody.findAll('td')
+        for lst in listitems:
+            if len(lst.contents) == 0:
+                continue
+            name = str(lst.contents[0])
+            if name == ' ':
+                continue
+            comma_pos = name.find(',')
+            if comma_pos == -1:
+                continue
+            else:
+                members.append('"' + name[:comma_pos] + '"')
+
+        return members
+
+    member_string = ''
+
+    # Energy and the Environment
+    member_string += ', '.join(parse_names('http://energycommerce.house.gov/index.php?option=com_content&view=article&id=1569&catid=160&Itemid=61', 'Subcommittee on Energy and the Environment', 'HSIF_env')) + '\n'
+
+    # Commerce, Trade, and Consumer Protection
+    member_string += ', '.join(parse_names('http://energycommerce.house.gov/index.php?option=com_content&view=article&id=1572&catid=160&Itemid=61', 'Subcommittee on Commerce, Trade, and Consumer Protection', 'HSIF_ctc')) + '\n'
+
+    # Communications, Technology, and the Internet
+    member_string += ', '.join(parse_names('http://energycommerce.house.gov/index.php?option=com_content&view=article&id=1570&catid=160&Itemid=61', 'Subcommittee on Communications, Technology, and the Internet', 'HSIF_cti')) + '\n'
+
+    # Health
+    member_string += ', '.join(parse_names('http://energycommerce.house.gov/index.php?option=com_content&view=article&id=1571&catid=160&Itemid=61', 'Subcommittee on Health', 'HSIF_hth')) + '\n'
+
+    # Oversight and Investigations
+    member_string += ', '.join(parse_names('http://energycommerce.house.gov/index.php?option=com_content&view=article&id=1573&catid=160&Itemid=61', 'Subcommittee on Oversight and Investigations', 'HSIF_osi')) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce]
 
 for t in tasks:
     print t(),

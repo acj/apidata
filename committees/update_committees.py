@@ -282,7 +282,47 @@ def comm_financialservices():
         members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices]
+def subcomm_financialservices():
+    def extract_names(tag, name, shortname):
+        names = [name, shortname]
+
+        listitems = tag.findAll('td')
+        for lst in listitems:
+            paras = lst.findAll('p')
+            for p in paras:
+                re_names = re.compile(r'Rep.\s+([^\n]+) \([A-Z][A-Z]\).*')
+                for c in tag.contents:
+                    for name in re_names.findall(str(c)):
+                        names.append('"' + name + '"')
+        return names
+
+    page = urllib2.urlopen("http://financialservices.house.gov/subassignments.html")
+    soup = BeautifulSoup(page)
+    member_string = ''
+    members = ['"House Committee on on Financial Services"', '"HSBA"']
+    tables = soup.findAll('table')
+
+    # Capital Markets, Insurance, and Government Sponsored Enterprises
+    member_string += ', '.join(extract_names(tables[4], 'Subcommittee on Capital Markets, Insurance, and Government Sponsored Enterprises', 'HSBA_cap')) + '\n'
+
+    # Financial Institutions and Consumer Credit
+    member_string += ', '.join(extract_names(tables[5], 'Subcommittee on Financial Institutions and Consumer Credit', 'HSBA_fic')) + '\n'
+
+    # Housing and Community Opportunity
+    member_string += ', '.join(extract_names(tables[6], 'Subcommittee on Housing and Community Opportunity', 'HSBA_hco')) + '\n'
+
+    # Domestic Monetary Policy and Technology
+    member_string += ', '.join(extract_names(tables[7], 'Subcommittee on Domestic Monetary Policy and Technology', 'HSBA_dmp')) + '\n'
+
+    # International Monetary Policy and Trade
+    member_string += ', '.join(extract_names(tables[8], 'Subcommittee on International Monetary Policy and Trade', 'HSBA_imp')) + '\n'
+
+    # Oversight and Investigations
+    member_string += ', '.join(extract_names(tables[9], 'Subcommittee on Oversight and Investigations', 'HSBA_osi')) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices]
 
 for t in tasks:
     print t(),

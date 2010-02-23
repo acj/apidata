@@ -267,7 +267,22 @@ def subcomm_energycommerce():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce]
+def comm_financialservices():
+    page = urllib2.urlopen("http://financialservices.house.gov/members.html")
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on on Financial Services"', '"HSBA"']
+    lists = soup.find('div', 'bodytext')
+    listitems = lists.findAll('a')
+    for lst in listitems:
+        name = str(lst.contents[0])
+        name = name.replace('Rep. ', '').replace('Chairman ', '')
+        comma_pos = name.find(',')
+        if comma_pos != -1:
+            name = name[:comma_pos]
+        members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices]
 
 for t in tasks:
     print t(),

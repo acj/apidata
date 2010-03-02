@@ -299,7 +299,7 @@ def subcomm_financialservices():
     page = urllib2.urlopen("http://financialservices.house.gov/subassignments.html")
     soup = BeautifulSoup(page)
     member_string = ''
-    members = ['"House Committee on on Financial Services"', '"HSBA"']
+    members = ['"House Committee on Financial Services"', '"HSBA"']
     tables = soup.findAll('table')
 
     # Capital Markets, Insurance, and Government Sponsored Enterprises
@@ -322,7 +322,19 @@ def subcomm_financialservices():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices]
+def comm_foreignaffairs():
+    page = urllib2.urlopen("http://foreignaffairs.house.gov/members.asp")
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Foreign Affairs"', '"HSFA"']
+    # Retrieve chairman first
+    member_div = soup.findAll('div', 'member')
+    for member in member_div:
+        a = member.find('a')
+        name = str(a.contents[0]).replace('&nbsp;', ' ')
+        members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs]
 
 for t in tasks:
     print t(),

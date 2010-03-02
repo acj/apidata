@@ -334,7 +334,38 @@ def comm_foreignaffairs():
         members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs]
+def subcomm_foreignaffairs():
+    def extract_names(url, name, shortname):
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        members = ['"' + name + '"', '"' + shortname + '"']
+        # Retrieve chairman first
+        member_div = soup.findAll('div', 'member')
+        for member in member_div:
+            a = member.find('a')
+            name = str(a.contents[0]).replace('&nbsp;', ' ')
+            members.append('"' + name + '"')
+        return members
+
+    member_string = ''
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=2', 'Subcommittee on Africa and Global Health', 'HSFA_afr')) + '\n'
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=3', 'Subcommittee on Asia, the Pacific, and the Global Environment', 'HSFA_pac')) + '\n'
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=4', 'Subcommittee on Europe', 'HSFA_eur')) + '\n'
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=5', 'Subcommittee on Terrorism, Nonproliferation, and Trade', 'HSFA_ter')) + '\n'
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=6', 'Subcommittee on International Organizations, Human Rights, and Oversight', 'HSFA_hro')) + '\n'
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=7', 'Subcommittee on the Middle East and South Asia', 'HSFA_mde')) + '\n'
+
+    member_string += ', '.join(extract_names('http://foreignaffairs.house.gov/subcommittees.asp?committee=8', 'Subcommittee on the Western Hemisphere', 'HSFA_whe')) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs]
 
 for t in tasks:
     print t(),

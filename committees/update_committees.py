@@ -217,6 +217,8 @@ def comm_energycommerce():
     lists = soup.find('tbody')
     listitems = lists.findAll('td')
     for lst in listitems:
+        if len(lst.contents) < 1:
+            continue
         name = str(lst.contents[0])
         if name == ' ':
             continue

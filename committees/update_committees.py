@@ -528,7 +528,168 @@ def subcomm_waysandmeans():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans]
+def comm_transportation():
+    page = urllib2.urlopen('http://transportation.house.gov/about.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Transportation and Infrastructure"', '"HSPW"']
+    # Pull the chairperson first
+    name = str(soup.findAll('p', align='center')[1].find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.find('tbody')
+    for tag in member_container.findAll('li'):
+        name = tag.contents[0]
+        commapos = name.find(',')
+        name = name[:commapos].replace('"', '\\"')
+        if name == 'Vacancy':
+            continue
+        members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+def subcomm_transportation():
+    member_string = ''
+    title = 'House Committee on Transportation and Infrastructure'
+
+    # Subcommittee on Aviation
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/aviation_members.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"' + title + '/Subcommittee on Aviation"', '"HSPW_air"']
+    # Pull the chairperson first
+    name = str(soup.find('p', align='center').find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.find('tbody')
+    for tag in member_container.findAll('td'):
+        subtag = str(tag.contents[1])
+        for protoname in subtag.split('<br />'):
+            commapos = protoname.find(',')
+            if commapos == -1:
+                continue
+            name = protoname[:commapos]
+            name = name.replace('<em>', '').replace('</em>', '')
+            name = name.replace('<br />', '').replace('<p>', '')
+            members.append('"' + name.strip() + '"')
+
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Coast Guard and Maritime Transportation
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/maritime_transportation_members.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"' + title + '/Subcommittee on Coast Guard and Maritime Transportation"', '"HSPW_sea"']
+    # Pull the chairperson first
+    name = str(soup.findAll('p', align='left')[1].find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.findAll('td', valign='top')
+    for tag in member_container:
+        subtag = str(tag.find('p'))
+        for protoname in subtag.split('<br />'):
+            commapos = protoname.find(',')
+            if commapos == -1:
+                continue
+            name = protoname[:commapos]
+            name = name.replace('<em>', '').replace('</em>', '')
+            name = name.replace('<br />', '').replace('<p>', '')
+            members.append('"' + name.strip() + '"')
+
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Economic Development, Public Buildings, and
+    # Emergency Management
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/economic_members.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"' + title + '/Subcommittee on Economic Development, Public Buildings, and Emergency Management"', '"HSPW_ecn"']
+    # Pull the chairperson first
+    name = str(soup.find('div', id='content').find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.findAll('td', valign='top')
+    for tag in member_container:
+        subtag = str(tag.find('p'))
+        for protoname in subtag.split('<br />'):
+            commapos = protoname.find(',')
+            if commapos == -1:
+                continue
+            name = protoname[:commapos]
+            name = name.replace('<em>', '').replace('</em>', '')
+            name = name.replace('<br />', '').replace('<p>', '')
+            name = name.replace('"', '\\"')
+            members.append('"' + name.strip() + '"')
+
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Highways and Transit
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/highways_transit_members.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"' + title + '/Subcommittee on Highways and Transit"', '"HSPW_hwy"']
+    # Pull the chairperson first
+    name = str(soup.find('p', align='center').find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.findAll('td', valign='top')
+    for tag in member_container:
+        subtag = str(tag.find('p'))
+        for protoname in subtag.split('<br />'):
+            commapos = protoname.find(',')
+            if commapos == -1:
+                continue
+            name = protoname[:commapos]
+            name = name.replace('<em>', '').replace('</em>', '')
+            name = name.replace('<br />', '').replace('<p>', '')
+            name = name.replace('"', '\\"')
+            members.append('"' + name.strip() + '"')
+
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Railroads, Pipelines, and Hazardous Materials
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/railroads_pipelines_members.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"' + title + '/Subcommittee on Railroads, Pipelines, and Hazardous Materials"', '"HSPW_rrd"']
+    # Pull the chairperson first
+    name = str(soup.find('p', align='center').find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.findAll('td', valign='top')
+    for tag in member_container:
+        subtag = str(tag.find('p'))
+        for protoname in subtag.split('<br />'):
+            commapos = protoname.find(',')
+            if commapos == -1:
+                continue
+            name = protoname[:commapos]
+            name = name.replace('<em>', '').replace('</em>', '')
+            name = name.replace('<br />', '').replace('<p>', '')
+            name = name.replace('"', '\\"')
+            members.append('"' + name.strip() + '"')
+
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Water Resources and Environment
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/WaterResources_members.aspx')
+    soup = BeautifulSoup(page)
+    members = ['"' + title + '/Subcommittee on Water Resources and Environment"', '"HSPW_wre"']
+    # Pull the chairperson first
+    name = str(soup.find('p', align='center').find('strong').contents[0])
+    members.append('"' + name[:name.find(',')] + '"')
+
+    member_container = soup.findAll('td', valign='top')
+    for tag in member_container:
+        subtag = str(tag.find('p'))
+        for protoname in subtag.split('<br />'):
+            commapos = protoname.find(',')
+            if commapos == -1:
+                continue
+            name = protoname[:commapos]
+            name = name.replace('<em>', '').replace('</em>', '')
+            name = name.replace('<br />', '').replace('<p>', '')
+            name = name.replace('"', '\\"')
+            members.append('"' + name.strip() + '"')
+
+    member_string += ', '.join(members) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation]
 
 for t in tasks:
     print t(),

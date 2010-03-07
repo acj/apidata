@@ -367,7 +367,27 @@ def subcomm_foreignaffairs():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs]
+def comm_energygw():
+    page = urllib2.urlopen("http://globalwarming.house.gov/about?id=0002")
+    soup = BeautifulSoup(page)
+    members = ['"House Select Committee on Energy Independence and Global Warming"', '"HSGW"']
+    # Retrieve chairman first
+    member_div = soup.findAll('div', 'pad')
+    for lst in member_div:
+        for a in lst.findAll('a'):
+            if len(a.contents) < 1:
+                continue
+            name = str(a.contents[0])
+            # Ignore links that do not refer to a member of congress
+            if name.find('Congress') == -1:
+                continue
+            # Filter title and state
+            name = name.replace('Congressman ', '').replace('Congresswoman ', '')
+            name = name[:name.find(' of ')]
+            members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs,comm_energygw]
 
 for t in tasks:
     print t(),

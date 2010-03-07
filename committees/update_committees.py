@@ -371,7 +371,6 @@ def comm_energygw():
     page = urllib2.urlopen("http://globalwarming.house.gov/about?id=0002")
     soup = BeautifulSoup(page)
     members = ['"House Select Committee on Energy Independence and Global Warming"', '"HSGW"']
-    # Retrieve chairman first
     member_div = soup.findAll('div', 'pad')
     for lst in member_div:
         for a in lst.findAll('a'):
@@ -387,7 +386,22 @@ def comm_energygw():
             members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs,comm_energygw]
+def comm_permanentintel():
+    page = urllib2.urlopen("http://intelligence.house.gov/MemberList.aspx")
+    soup = BeautifulSoup(page)
+    members = ['"House Permanent Select Committee on Intelligence"', '"HSIG"']
+    member_div = soup.find('table', cellpadding='1')
+    for a in member_div.findAll('a'):
+        if len(a.contents) < 1:
+            continue
+        name = str(a.contents[0])
+        commapos = name.find(',')
+        if commapos != -1:
+            name = name[:commapos]
+        members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs,comm_energygw,comm_permanentintel]
 
 for t in tasks:
     print t(),

@@ -402,8 +402,12 @@ def comm_permanentintel():
     return ', '.join(members) + '\n'
 
 def comm_rules():
+    title = 'House Committee on Rules'
     def extract_names(tag, name, shortname):
-        members = ['"' + name + '"', '"' + shortname + '"']
+        full_name = title
+        if name != '':
+            full_name += '/' + name
+        members = ['"' + full_name + '"', '"' + shortname + '"']
         member_container = tag
         for a in member_container.findAll('a'):
             name = ''
@@ -429,24 +433,102 @@ def comm_rules():
     page = urllib2.urlopen("http://www.rules.house.gov/rules_members.htm")
     soup = BeautifulSoup(page)
     member_container = soup.find('table', cellspacing='4')
-    members = extract_names(member_container, 'House Committee on Rules', 'HSRU')
+    members = extract_names(member_container, '', 'HSRU')
     member_string += ', '.join(members) + '\n'
 
     subcommittees = soup.findAll('table', width='100%', border='0')
 
     # Subcommittee on Legislative and Budget Process
     member_div = subcommittees[0]
-    members = extract_names(member_container, 'House Subcommittee on Legislative and Budget Process', 'HSRU_lbp')
+    members = extract_names(member_container, 'Subcommittee on Legislative and Budget Process', 'HSRU_lbp')
     member_string += ', '.join(members) + '\n'
 
     # Subcommittee on Organization of the House
     member_container = subcommittees[1]
-    members = extract_names(member_container, 'House Subcommittee on Rules and Organization of the House', 'HSRU_roh')
+    members = extract_names(member_container, 'Subcommittee on Rules and Organization of the House', 'HSRU_roh')
     member_string += ', '.join(members) + '\n'
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules]
+# TODO: Committee on the Judiciary
+# - First names are not available
+# - html is ugly
+
+def comm_veterans():
+    title = 'House Committee on Veterans\' Affairs'
+    def extract_names(url, name, shortname):
+        full_name = title
+        if name != '':
+            full_name += '/' + name
+        members = ['"' + full_name + '"', '"' + shortname + '"']
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        member_tbody = soup.find('tbody')
+        for a in member_tbody.findAll('a'):
+            name = str(a.contents[0])
+            statepos = name.find(' (')
+            if statepos != -1:
+                name = name[:statepos]
+                members.append('"' + name + '"')
+        return members
+
+    member_string = ''
+    
+    member_string += ', '.join(extract_names('http://veterans.house.gov/about/members.shtml', '', 'HSVR')) + '\n'
+
+    member_string += ', '.join(extract_names('http://veterans.house.gov/disability/', 'Subcommittee on Disability Assistance and Memorial', 'HSVR_dam')) + '\n'
+
+    member_string += ', '.join(extract_names('http://veterans.house.gov/economic/', 'Subcommittee on Economic Opportunity', 'HSVR_eop')) + '\n'
+
+    member_string += ', '.join(extract_names('http://veterans.house.gov/health/', 'Subcommittee on Health', 'HSVR_hea')) + '\n'
+
+    member_string += ', '.join(extract_names('http://veterans.house.gov/oversight/', 'Subcommittee on Oversight and Investigations', 'HSVR_osi')) + '\n'
+
+    return member_string
+
+def comm_waysandmeans():
+    page = urllib2.urlopen('http://waysandmeans.house.gov/singlepages.aspx?newsid=10462')
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Ways and Means"', '"HSWM"']
+    member_container = soup.find('tbody')
+    for tag in member_container.findAll('font', color='#0000ff'):
+        name = tag.contents[0]
+        members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+def subcomm_waysandmeans():
+    title = 'House Committee on Ways and Means'
+    def extract_names(url, name, shortname):
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        full_name = title
+        if name != '':
+            full_name += '/' + name
+        members = ['"' + full_name + '"', '"' + shortname + '"']
+        member_container = soup.find('tbody')
+        for tag in member_container.findAll('a'):
+            name = str(tag.contents[0])
+            members.append('"' + name.strip() + '"')
+
+        return members
+
+    member_string = ''
+
+    member_string += ', '.join(extract_names('http://waysandmeans.house.gov/subcommittees/Default.aspx/health', 'Subcommittee on Health', 'HSWM_hea')) + '\n'
+
+    member_string += ', '.join(extract_names('http://waysandmeans.house.gov/subcommittees/Default.aspx/incomeSecurity', 'Subcommittee on Income Security and Family Support', 'HSWM_fam')) + '\n'
+
+    member_string += ', '.join(extract_names('http://waysandmeans.house.gov/subcommittees/Default.aspx/oversight', 'Subcommittee on Oversight', 'HSWM_osi')) + '\n'
+
+    member_string += ', '.join(extract_names('http://waysandmeans.house.gov/subcommittees/Default.aspx/selectrevenue', 'Subcommittee on Select Revenue Measures', 'HSWM_srm')) + '\n'
+
+    member_string += ', '.join(extract_names('http://waysandmeans.house.gov/subcommittees/Default.aspx/socialsecurity', 'Subcommittee on Social Security', 'HSWM_ssc')) + '\n'
+
+    member_string += ', '.join(extract_names('http://waysandmeans.house.gov/subcommittees/Default.aspx/trade', 'Subcommittee on Trade', 'HSWM_trd')) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans]
 
 for t in tasks:
     print t(),

@@ -401,7 +401,52 @@ def comm_permanentintel():
         members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs,comm_energygw,comm_permanentintel]
+def comm_rules():
+    def extract_names(tag, name, shortname):
+        members = ['"' + name + '"', '"' + shortname + '"']
+        member_container = tag
+        for a in member_container.findAll('a'):
+            name = ''
+            font_tag = a.find('font')
+            if font_tag != None:
+                name = font_tag.contents[0]
+            else:
+                name = str(a.contents[0])
+            
+            name = name.replace('\n', '').replace('\r', '').replace('         ', '')
+            name = name.replace('Chairwoman ', '').replace('Chairman ', '')
+            name = name.replace(',', '')
+            commapos = name.find('<')
+            if commapos != -1:
+                name = name[:commapos]
+            name = name.rstrip()
+            if name == '':
+                continue
+            members.append('"' + name + '"')
+        return members
+
+    member_string = ''
+    page = urllib2.urlopen("http://www.rules.house.gov/rules_members.htm")
+    soup = BeautifulSoup(page)
+    member_container = soup.find('table', cellspacing='4')
+    members = extract_names(member_container, 'House Committee on Rules', 'HSRU')
+    member_string += ', '.join(members) + '\n'
+
+    subcommittees = soup.findAll('table', width='100%', border='0')
+
+    # Subcommittee on Legislative and Budget Process
+    member_div = subcommittees[0]
+    members = extract_names(member_container, 'House Subcommittee on Legislative and Budget Process', 'HSRU_lbp')
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Organization of the House
+    member_container = subcommittees[1]
+    members = extract_names(member_container, 'House Subcommittee on Rules and Organization of the House', 'HSRU_roh')
+    member_string += ', '.join(members) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules]
 
 for t in tasks:
     print t(),

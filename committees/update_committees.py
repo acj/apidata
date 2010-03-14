@@ -7,7 +7,7 @@
 
 import re
 import urllib2
-from BeautifulSoup import BeautifulSoup
+from BeautifulSoup import BeautifulSoup, Comment
 
 def comm_agriculture():
     members = ['"House Committee on Agriculture"', '"HSAG"']
@@ -757,8 +757,52 @@ def subcomm_smallbusiness():
 
     return member_string
 
+# TODO: Need to replace 'Mr.' and 'Ms.' with appropriate first names in
+#       subcommittee lists.
+def comm_science():
+    title = 'House Committee on Science and Technology'
+    def extract_names(container, name, shortname):
+        full_title = '"' + title
+        if name != '':
+            full_title += '/' + name + '"'
+        members = [full_title, '"' + shortname + '"']
+        for protoname in container.findAll('a'):
+            name = protoname.contents[0]
+            name = name.replace('\n', '').replace('\r', '')
+            name = name.replace('                     ', '')
+            # Skip the list of resolutions
+            if name.find('Res.') != -1:
+                continue
+            name = name.rstrip(' ')
+            members.append('"' + name + '"')
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness]
+        return members
+
+    page = urllib2.urlopen('http://science.house.gov/about/members.shtml')
+    soup = BeautifulSoup(page)
+
+    # Remove HTML comments
+    comments = soup.findAll(text=lambda text:isinstance(text, Comment))
+    [comment.extract() for comment in comments]
+
+    member_container = soup.findAll('table', width='100%', align='center')
+
+    member_string = ''
+    member_string += ', '.join(extract_names(member_container[0], '', 'HSSY')) + '\n'
+
+    member_string += ', '.join(extract_names(BeautifulSoup(''.join(str(member_container[1].contents) + str(member_container[2].contents))), 'Subcommittee on Technology and Innovation', 'HSSY_tec')) + '\n'
+
+    member_string += ', '.join(extract_names(BeautifulSoup(''.join(str(member_container[3].contents) + str(member_container[4].contents))), 'Subcommittee on Energy and Environment', 'HSSY_ene')) + '\n'
+
+    member_string += ', '.join(extract_names(BeautifulSoup(''.join(str(member_container[5].contents) + str(member_container[6].contents))), 'Subcommittee on Investigations and Oversight', 'HSSY_osi')) + '\n'
+
+    member_string += ', '.join(extract_names(BeautifulSoup(''.join(str(member_container[7].contents) + str(member_container[8].contents))), 'Subcommittee on Research and Science Education', 'HSSY_res')) + '\n'
+
+    member_string += ', '.join(extract_names(BeautifulSoup(''.join(str(member_container[9].contents) + str(member_container[10].contents))), 'Subcommittee on Space and Aeronautics', 'HSSY_spc')) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science]
 
 for t in tasks:
     print t(),

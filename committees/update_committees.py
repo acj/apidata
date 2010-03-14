@@ -902,7 +902,193 @@ def comm_cha():
     
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha]
+def comm_natres():
+    title = 'House Committee on Natural Resources'
+    member_string = ''
+    members = ['"' + title + '"', '"HSII"']
+    page = urllib2.urlopen('http://resourcescommittee.house.gov/index.php?option=com_content&task=view&id=96&Itemid=27')
+    soup = BeautifulSoup(page)
+
+    member_container = soup.findAll('div', align='center')[1]
+
+    # Chairperson first
+    strong = member_container.find('strong')
+    name = str(strong.contents[0])
+    comma_pos = name.find(',')
+    members.append('"' + name[4:comma_pos] + '"')
+
+    # Main committee
+    member_container = member_container.find('table', border='0', cellpadding='0')
+    rows = member_container.findAll('td')
+    name_list = []
+    for row in rows:
+        names = str(row.contents[0])
+        names = names.replace('\r', '').replace('\n', '').replace('\t', '')
+        names = names.replace('<em>', '').replace('</em>', '')
+        names = names.split('<br />')
+        cleaned_names = []
+        for n in names:
+            comma_pos = n.find(',')
+            if comma_pos != -1:
+                n = n[:comma_pos]
+            cleaned_names.append(n)
+        name_list += cleaned_names
+
+    members += name_list
+    member_string += ', '.join(members) + '\n'
+
+    # Energy and Mineral Resources
+    members = ['"' + title + '/Subcommittee on Energy and Mineral Resources"', '"HSII_ene"']
+    member_container = soup.findAll('div', align='center')[2]
+    strong = member_container.findAll('strong')[2]
+    name = str(strong.contents[0])
+    comma_pos = name.find(',')
+    members.append('"' + name[4:comma_pos] + '"')
+
+    member_container = soup.findAll('div', align='center')[3]
+    member_container = member_container.find('table', border='0')
+    rows = member_container.findAll('td', align='left')
+    name_list = []
+    for row in rows:
+        names = ''.join(str(row.contents))
+        names = names.replace('\r', '').replace('\n', '').replace('\t', '')
+        names = names.replace('<em>', '').replace('</em>', '')
+        names = names.replace('[u\'\\n\', ', '')
+        names = names.replace('<div align="left">', '').replace('</div>', '')
+        names = names.split('<br />')
+        cleaned_names = []
+        for n in names:
+            comma_pos = n.find(',')
+            if comma_pos != -1:
+                n = n[:comma_pos]
+            cleaned_names.append('"' + n + '"')
+        name_list += cleaned_names
+
+    members += name_list
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Insular Affairs, Oceans and Wildlife
+    members = ['"' + title + '/Subcommittee on Insular Affairs, Oceans and Wildlife"', '"HSII_iow"']
+    member_container = soup.findAll('p', align='center')[6]
+    strong = member_container.findAll('strong')[2]
+    name = str(strong.contents[0])
+    comma_pos = name.find(',')
+    members.append('"' + name[5:comma_pos] + '"')
+
+    # Ranking member
+    em = member_container.find('em')
+    name = str(em.contents[0])
+    comma_pos = name.find(',')
+    name = name[4:comma_pos]
+    members.append('"' + name + '"')
+
+    member_container = soup.findAll('div', align='center')[4]
+    member_container = member_container.find('table', border='0')
+    rows = member_container.findAll('td', align='left')
+    name_list = []
+    for row in rows:
+        names = str(row.contents[0])
+        names = names.replace('\r', '').replace('\n', '').replace('\t', '')
+        names = names.replace('<em>', '').replace('</em>', '')
+        names = names.replace('[u\'\\n\', ', '')
+        names = names.replace('<div align="left">', '').replace('</div>', '')
+        names = names.split('<br />')
+        cleaned_names = []
+        for n in names:
+            comma_pos = n.find(',')
+            if comma_pos != -1:
+                n = n[:comma_pos]
+            cleaned_names.append('"' + n + '"')
+        name_list += cleaned_names
+
+    members += name_list
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on National Parks, Forests and Public Lands
+    members = ['"' + title + '/Subcommittee on National Parks, Forests and Public Lands"', '"HSII_nps"']
+    member_container = soup.findAll('div', align='center')[5]
+    strong = member_container.findAll('strong')[1]
+    name = str(strong.contents[0])
+    comma_pos = name.find(',')
+    members.append('"' + name[5:comma_pos] + '"')
+
+    # Ranking member
+    em = member_container.find('em')
+    name = str(em.contents[0])
+    comma_pos = name.find(',')
+    name = name[4:comma_pos]
+    members.append('"' + name + '"')
+
+    member_container = soup.findAll('div', align='center')[6]
+    member_container = member_container.find('table', border='0')
+    rows = member_container.findAll('td', align='left')
+    name_list = []
+    for row in rows:
+        names = str(row.contents)
+        names = names.replace('\r', '').replace('\n', '').replace('\t', '')
+        names = names.replace('\\r', '').replace('\\n', '').replace('\\t', '')
+        names = names.replace('<em>', '').replace('</em>', '')
+        names = names.replace('u\'', '').replace('[', '')
+        names = names.replace('<div align="left">', '').replace('</div>', '')
+        names = names.split('<br />')
+        cleaned_names = []
+        for n in names:
+            if n[0:2] == ', ':
+                n = n[2:]
+            comma_pos = n.find(',')
+            if comma_pos != -1:
+                n = n[:comma_pos]
+            cleaned_names.append('"' + n + '"')
+        name_list += cleaned_names
+
+    members += name_list
+    member_string += ', '.join(members) + '\n'
+
+    # Subcommittee on Water and Power
+    members = ['"' + title + '/Subcommittee on Water and Power"', '"HSII_wat"']
+    member_container = soup.findAll('div', align='center')[6]
+
+    strong = member_container.findAll('strong')[1]
+    name = str(strong.contents[0])
+    comma_pos = name.find(',')
+    members.append('"' + name[5:comma_pos] + '"')
+
+    # Ranking member
+    em = member_container.findAll('em')[1]
+    name = str(em.contents[0])
+    comma_pos = name.find(',')
+    name = name[4:comma_pos]
+    members.append('"' + name + '"')
+
+    table = member_container.findAll('table', border='0')[1]
+    
+    rows = table.findAll('td', align='left')
+    name_list = []
+    for row in rows:
+        names = ''.join(str(row.contents))
+        names = names.replace('\\r', '').replace('\\n', '').replace('\\t', '')
+        names = names.replace('\r', '').replace('\n', '').replace('\t', '')
+        names = names.replace('<em>', '').replace('</em>', '')
+        names = names.replace('u\'', '').replace('[', '')
+        names = names.replace('<div align="left">', '').replace('</div>', '')
+        names = names.split('<br />')
+        cleaned_names = []
+        for n in names:
+            if n[0:2] == ', ':
+                n = n[2:]
+            comma_pos = n.find(',')
+            if comma_pos != -1:
+                n = n[:comma_pos]
+            cleaned_names.append('"' + n + '"')
+        name_list += cleaned_names
+
+    members += name_list
+    member_string += ', '.join(members) + '\n'
+
+    return member_string
+        
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres]
 
 for t in tasks:
     print t(),

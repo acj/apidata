@@ -689,7 +689,76 @@ def subcomm_transportation():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation]
+def comm_smallbusiness():
+    page = urllib2.urlopen('http://www.house.gov/smbiz/democrats/members.htm')
+    soup = BeautifulSoup(page)
+    members = ['"House Committee on Small Business"', '"HSSM"']
+
+    member_container = soup.findAll('p', 'style8')
+    for container in member_container:
+        for protoname in container.findAll('a'):
+            name = protoname.contents[0]
+            name = name.replace('Chairman', '').replace('Chairwoman', '')
+            name = name.replace('Congressman', '').replace('Congresswoman', '')
+            name = name.replace('Ranking Member', '')
+            of_pos = name.find(' of ')
+            name = name[:of_pos]
+            name = name.strip()
+            members.append('"' + name + '"')
+    return ', '.join(members) + '\n'
+
+def subcomm_smallbusiness():
+    title = 'House Committee on Small Business'
+    def extract_names(container, name, shortname):
+        members = ['"' + title + '/' + name + '"', '"' + shortname + '"']
+
+        for item in combined:
+            name = str(item).strip()
+            if name == '<br />':
+                continue
+
+            name = name.replace('Congressman', '').replace('Congresswoman', '')
+            comma_pos = name.find(',')
+            if comma_pos != -1:
+                name = name[:comma_pos]
+
+            members.append('"' + name.strip() + '"')
+
+        return members
+
+    page = urllib2.urlopen('http://www.house.gov/smbiz/democrats/subcommittees.htm')
+    soup = BeautifulSoup(page)
+
+
+    member_string = ''
+    member_container = soup.findAll('div', align='center')[5]
+
+    paras = member_container.findAll('p', align='left')
+    
+    # Finance and Tax
+    combined = paras[0].contents + paras[1].contents
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Finance and Tax', 'HSSM_tax')) + '\n'
+
+    # Contracting and Technology
+    combined = paras[3].contents + paras[4].contents
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Contracting and Technology', 'HSSM_tec')) + '\n'
+
+    # Regulations and Healthcare
+    combined = paras[6].contents + paras[7].contents
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Regulations and Healthcare', 'HSSM_rhc')) + '\n'
+
+    # Rural Development, Entrepreneurship and Trade
+    combined = paras[9].contents + paras[10].contents
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Rural Development, Entrepreneurship and Trade', 'HSSM_ret')) + '\n'
+
+    # Investigations and Oversight
+    combined = paras[12].contents + paras[13].contents
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Investigations and Oversight', 'HSSM_osi')) + '\n'
+
+    return member_string
+
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness]
 
 for t in tasks:
     print t(),

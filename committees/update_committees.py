@@ -7,7 +7,7 @@
 
 import re
 import urllib2
-from BeautifulSoup import BeautifulSoup, Comment
+from BeautifulSoup import BeautifulSoup, Comment, Tag
 
 def comm_agriculture():
     members = ['"House Committee on Agriculture"', '"HSAG"']
@@ -802,7 +802,107 @@ def comm_science():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science]
+def comm_hsc():
+    members = ['"House Committee on Homeland Security"', '"HSHM"']
+    # Democrat site
+    page = urllib2.urlopen('http://hsc.house.gov/about/members.asp')
+    soup = BeautifulSoup(page)
+
+    member_container = soup.find('div', id='middlecolumn')
+    for protoname in member_container.findAll('a')[6:]:
+        if len(protoname.contents) == 0:
+            continue
+        name = protoname.contents[0]
+        print name
+        members.append('"' + name + '"')
+
+    # Republican site
+    page = urllib2.urlopen('http://chs-republicans.house.gov/committee.shtml')
+    soup = BeautifulSoup(page)
+
+    member_container = soup.find('table', width='542')
+    for protoname in member_container.findAll('a'):
+        members.append('"' + protoname.contents[0] + '"')
+
+    return ', '.join(members) + '\n'
+
+def subcomm_hsc():
+    title = 'House Committee on Homeland Security'
+    def extract_names(url, name, shortname):
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        full_title = '"' + title
+        if name != '':
+            full_title += '/' + name
+        full_title += '"'
+        members = [full_title, '"' + shortname + '"']
+        para = soup.find('p')
+
+        # Chairperson first
+        strong = para.findAll('strong')[1]
+        chairperson = str(strong.contents[0])
+        comma_pos = chairperson.find(',')
+        chairperson = chairperson[:comma_pos]
+        members.append('"' + chairperson + '"')
+
+        for protoname in para.findAll('td')[3:]:
+            name = str(protoname.contents[0]).rstrip(' ')
+            if name == 'Vacancy' or name == 'vacancy' or name == '':
+                continue
+
+            comma_pos = name.find(',')
+            if comma_pos != -1:
+                name = name[:comma_pos]
+            members.append('"' + name + '"')
+
+        return members
+
+    member_string = ''
+
+    member_string += ', '.join(extract_names('http://hsc.house.gov/about/subcommittees.asp?subcommittee=8', 'Subcommittee on Border, Maritime and Global Counterterrorism', 'HSHM_bor')) + '\n'
+
+    member_string += ', '.join(extract_names('http://hsc.house.gov/about/subcommittees.asp?subcommittee=11', 'Subcommittee on Intelligence, Information Sharing and Terrorism Risk Assessment', 'HSHM_int')) + '\n'
+
+    member_string += ', '.join(extract_names('http://hsc.house.gov/about/subcommittees.asp?subcommittee=10', 'Subcommittee on Transportation Security and Infrastructure Protection', 'HSHM_tra')) + '\n'
+
+    member_string += ', '.join(extract_names('http://hsc.house.gov/about/subcommittees.asp?subcommittee=12', 'Subcommittee on Emerging Threats, Cybersecurity, and Science and Technology', 'HSHM_cyb')) + '\n'
+
+    member_string += ', '.join(extract_names('http://hsc.house.gov/about/subcommittees.asp?subcommittee=9', 'Subcommittee on Emergency Communications, Preparedness, and Response', 'HSHM_cpr')) + '\n'
+
+    member_string += ', '.join(extract_names('http://hsc.house.gov/about/subcommittees.asp?subcommittee=13', 'Subcommittee on Management, Investigations, and Oversight', 'HSHM_osm')) + '\n'
+
+    return member_string
+
+def comm_cha():
+    title = 'House Committee on House Administration'
+
+    def extract_names(url, name, shortname):
+        full_title = '"' + title
+        if name != '':
+            full_title += '/' + name
+        full_title += '"'
+        members = [full_title, shortname]
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        member_container = soup.find('table', width='446')
+        for a in member_container.findAll('a'):
+            # Ignore linked images and other objects
+            if type(a.contents[0]) == Tag:
+                continue
+            members.append('"' + a.contents[0] + '"')
+        return members
+
+    member_string = ''
+
+    member_string += ', '.join(extract_names('http://cha.house.gov/committee_membership.aspx', '', 'HSHA')) + '\n'
+
+    member_string += ', '.join(extract_names('http://cha.house.gov/elections.aspx', 'Subcommittee on Elections', 'HSHA_ele')) + '\n'
+
+    member_string += ', '.join(extract_names('http://cha.house.gov/security.aspx', 'Subcommittee on Capitol Security', 'HSHA_csc')) + '\n'
+    
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha]
 
 for t in tasks:
     print t(),

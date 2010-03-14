@@ -1086,9 +1086,98 @@ def comm_natres():
     member_string += ', '.join(members) + '\n'
 
     return member_string
-        
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres]
+def comm_oversight():
+    title = 'House Committee on Oversight and Government Reform'
+    members = ['"' + title + '"', '"HSGO"']
+    page = urllib2.urlopen('http://oversight.house.gov/index.php?option=com_content&view=article&id=2229:membership&catid=37&Itemid=20')
+    soup = BeautifulSoup(page)
+
+    member_container = soup.find('div', id='members')
+    lists = member_container.findAll('li')
+
+    for lst in lists:
+        link_tag = lst.find('a')
+        name = ''
+        if link_tag == None:
+            name = lst.contents[0]
+        else:
+            name = link_tag.contents[0]
+
+        name = name.replace('Chairman, ', '')
+        name = name.replace('Rep. ', '')
+        comma_pos = name.find(',')
+        if comma_pos != -1:
+            name = name[:comma_pos]
+        name = name.replace('"', '\\"')
+        members.append('"' + name + '"')
+
+    return ', '.join(members) + '\n'
+
+def subcomm_oversight():
+    title = 'House Committee on Oversight and Government Reform'
+    
+    def extract_names(container, name, shortname):
+        full_title = '"' + title
+        if name != '':
+            full_title += '/' + name
+        full_title += '"'
+        members = [full_title, '"' + shortname + '"']
+
+        divs = container.findAll('div')
+        
+        for div in divs:
+            inner_container = div
+            para = div.find('p')
+            if para != None:
+                inner_container = para
+            names = []
+            for n in inner_container:
+                name = str(n)
+                name = name.replace('<strong>', '').replace('</strong>', '')
+                name = name.replace(', Chairman', '')
+                name = name.replace('u\'', '').replace('\\r', '')
+                name = name.replace('\'', '')
+                name = name.replace('\\n', '').replace('[', '').replace(']', '')
+                if name == '<br />' or name == ' ':
+                    continue
+                elif name == 'Majority' or name == 'Minority':
+                    continue
+                if name[0:2] == ', ':
+                    name = name[3:]
+                comma_pos = name.find(',')
+                if comma_pos > 1:
+                    name = name[:comma_pos]
+                members.append('"' + name.strip(' ') + '"')
+
+        return members
+
+    page = urllib2.urlopen('http://oversight.house.gov/index.php?option=com_content&view=article&id=4445&Itemid=19')
+    soup = BeautifulSoup(page)
+
+    member_string = ''
+
+    table = soup.findAll('table', 'contentpaneopen')[1]
+    divs = table.findAll('div')
+
+    combined = BeautifulSoup(str(divs[1]) + str(divs[2]))
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Domestic Policy', 'HSGO_dom')) + '\n'
+
+    combined = BeautifulSoup(str(divs[4]) + str(divs[5]))
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Federal Workforce, Postal Services, and the District of Columbia', 'HSGO_fed')) + '\n'
+
+    combined = BeautifulSoup(str(divs[7]) + str(divs[8]))
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Government Management, Organization, and Procurement', 'HSGO_gpo')) + '\n'
+
+    combined = BeautifulSoup(str(divs[10]) + str(divs[11]))
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on Information Policy, Census, and National Archives', 'HSGO_icn')) + '\n'
+
+    combined = BeautifulSoup(str(divs[12]) + '<div>' + str(table.find('td').contents[-19:]) + '</div>')
+    member_string += ', '.join(extract_names(combined, 'Subcommittee on National Security and Foreign Affairs', 'HSGO_nsc')) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight]
 
 for t in tasks:
     print t(),

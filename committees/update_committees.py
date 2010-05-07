@@ -1201,7 +1201,65 @@ def comm_homelandsecurity():
 
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity]
+def comm_help():
+    members = ['"Senate Committee on Health, Education, Labor and Pensions"', '"SSHR"']
+    page = urllib2.urlopen('http://help.senate.gov/about/')
+    soup = BeautifulSoup(page)
+
+    member_string = ''
+    member_container = soup.find('div', id='member-list')
+    a_lst = member_container.findAll('a')
+    for a in a_lst:
+        member = str(a.contents[0]).strip()
+        paren_pos = member.find(' (') 
+        members.append('"' + member[:paren_pos] + '"')
+    member_string += ', '.join(members) + '\n'
+
+    subcomms = soup.find('div', id='subcommittees')
+    subcomms_ul = subcomms.findAll('ul')
+
+    members = ['"Subcommittee on Children and Families"', '"SSHR_cfm"']
+    member_container = subcomms_ul[0]
+    for a in member_container.findAll('a'):
+        member = a.contents[0]
+        paren_pos = member.find(' (')
+        members.append('"' + member[:paren_pos] + '"')
+    member_container = subcomms_ul[1]
+    for a in member_container.findAll('a'):
+        member = a.contents[0]
+        paren_pos = member.find(' (')
+        members.append('"' + member[:paren_pos] + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"Subcommittee on Employment and Workplace Safety"', '"SSHR_cfm"']
+    member_container = subcomms_ul[2]
+    for a in member_container.findAll('a'):
+        member = a.contents[0]
+        paren_pos = member.find(' (')
+        members.append('"' + member[:paren_pos] + '"')
+    member_container = subcomms_ul[3]
+    for a in member_container.findAll('a'):
+        member = a.contents[0]
+        paren_pos = member.find(' (')
+        members.append('"' + member[:paren_pos] + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"Subcommittee on Retirement and Aging"', '"SSHR_age"']
+    member_container = subcomms_ul[4]
+    for a in member_container.findAll('a'):
+        member = a.contents[0]
+        paren_pos = member.find(' (')
+        members.append('"' + member[:paren_pos] + '"')
+    member_container = subcomms_ul[5]
+    for a in member_container.findAll('a'):
+        member = a.contents[0]
+        paren_pos = member.find(' (')
+        members.append('"' + member[:paren_pos] + '"')
+    member_string += ', '.join(members) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help]
 
 for t in tasks:
     print t(),

@@ -1259,7 +1259,136 @@ def comm_help():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help]
+def comm_foreign():
+    members = ['"Senate Committee on Foreign Relations"', '"SSFR"']
+    page = urllib2.urlopen('http://foreign.senate.gov')
+    soup = BeautifulSoup(page)
+
+    member_container = soup.find('div', id='democrats')
+    for m in member_container.findAll('div'):
+        members.append('"' + m.contents[0] + '"')
+    member_container = soup.find('div', id='republicans')
+    for m in member_container.findAll('div'):
+        members.append('"' + m.contents[0] + '"')
+
+    return ', '.join(members) + '\n'
+
+def subcomm_foreign():
+    member_string = ''
+    title = 'Senate Committee on Foreign Relations'
+    page = urllib2.urlopen('http://foreign.senate.gov/about/')
+    soup = BeautifulSoup(page)
+    # NOTE: subcomms seems to pick up the contents of subcomms_last as well
+    subcomms = soup.findAll('ul', 'side-column-2')
+    subcomms_last = soup.findAll('ul', 'side-column-2 last')
+    members = ['"' + title + '/Subcommittee on Western Hemisphere, Peace Corps, and Global Narcotics Affairs"', '"SSFR_whe"']
+    for m in subcomms[0].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[0].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"' + title + '/Subcommittee on African Affairs"', '"SSFR_afr"']
+    for m in subcomms[2].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[1].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"' + title + '/Subcommittee on International Operations and Organizations, Human Rights, Democracy, and Global Women\'s Issues"', '"SSFR_hrd"']
+    for m in subcomms[4].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[2].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"' + title + '/Subcommittee on International Development and Foreign Assistance, Economic Affairs and International Development Protection"', '"SSFR_aid"']
+    for m in subcomms[6].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[3].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"' + title + '/Subcommittee on Near East and South and Central Asian Affairs"', '"SSFR_asi"']
+    for m in subcomms[8].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[4].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"' + title + '/Subcommittee on East Asian and Pacific Affairs"', '"SSFR_pac"']
+    for m in subcomms[10].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[5].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    members = ['"' + title + '/Subcommittee on European Affairs"', '"SSFR_eur"']
+    for m in subcomms[12].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    for m in subcomms_last[6].findAll('li'):
+        if len(m.contents) > 0:
+            name = m.contents[0]
+            if name[-2:] == ', ':
+                name = name[:len(name)-2]
+            members.append('"' + name + '"')
+    member_string += ', '.join(members) + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign]
 
 for t in tasks:
     print t(),

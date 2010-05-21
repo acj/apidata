@@ -1388,7 +1388,22 @@ def subcomm_foreign():
 
     return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign]
+def comm_senate_finance():
+    members = ['"Senate Committee on Finance"', '"SSFI"']
+    page = urllib2.urlopen('http://finance.senate.gov/about/')
+    soup = BeautifulSoup(page)
+
+    member_containers = soup.findAll('div', 'column-3')
+    for m in member_containers:
+        a = m.find('a')
+        name = str(a.contents[2])
+        name = name.replace('&nbsp;', ' ').replace('&raquo;', '')
+        name = name.lstrip().rstrip()
+        members.append('"' + name + '"')
+
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance]
 
 for t in tasks:
     print t(),

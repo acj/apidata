@@ -1403,7 +1403,53 @@ def comm_senate_finance():
 
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance]
+def subcomm_senate_finance():
+    member_string = ''
+    title = 'Senate Committee on Finance'
+    page = urllib2.urlopen('http://finance.senate.gov/about/subcommittees/')
+    soup = BeautifulSoup(page)
+
+    def parse_members(div_dem, div_rep, name, shortname):
+        members = [name, shortname]
+        para = [str(x) for x in div_dem]
+        strpara = ''.join(para)
+        strpara = strpara.replace('<p>', '').replace('</p>', '')
+        memberlist = strpara.split('<br />')
+        for m in memberlist:
+            if m.find('<strong>') == -1:
+                commapos = m.find(',')
+                name = m[:commapos].lstrip().rstrip()
+                if name != '':
+                    members.append('"' + name + '"')
+
+        para = [str(x) for x in div_rep]
+        strpara = ''.join(para)
+        strpara = strpara.replace('<p>', '').replace('</p>', '')
+        memberlist = strpara.split('<br />')
+        for m in memberlist:
+            if m.find('<strong>') == -1:
+                commapos = m.find(',')
+                name = m[:commapos].lstrip().rstrip()
+                if name != '':
+                    members.append('"' + name + '"')
+
+        return ', '.join(members) + '\n'
+
+    subcomms = soup.findAll('div', 'column-2')
+
+    member_string += parse_members(subcomms[0].contents, subcomms[1].contents, '"' + title + '/Subcommittee on Health Care"', '"SSFI_hcr"')
+
+    member_string += parse_members(subcomms[2].contents, subcomms[3].contents, '"' + title + '/Subcommittee on Taxation, IRS Oversight, and Long-Term Growth"', '"SSFI_tax"')
+
+    member_string += parse_members(subcomms[4].contents, subcomms[5].contents, '"' + title + '/Subcommittee on Energy, Natural Resources, and Infrastructure"', '"SSFI_ene"')
+
+    member_string += parse_members(subcomms[6].contents, subcomms[7].contents, '"' + title + '/Subcommittee on Social Security, Pensions, and Family Policy"', '"SSFI_ssp"')
+
+    member_string += parse_members(subcomms[8].contents, subcomms[9].contents, '"' + title + '/Subcommittee on International Trade, Customs, and Global Competitiveness"', '"SSFI_tra"')
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance]
 
 for t in tasks:
     print t(),

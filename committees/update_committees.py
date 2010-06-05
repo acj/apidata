@@ -1458,19 +1458,37 @@ def comm_senate_ethics():
     member_containers = soup.findAll('font', size='1', face='Verdana, Arial, Helvetica, sans-serif')
     for a in member_containers[9].findAll('a'):
         name = str(a.contents[0])
-        name = name.replace('&nbsp;', ' ').replace('&raquo;', '')
         name = name.lstrip().rstrip()
         members.append('"' + name + '"')
     # Republicans
     for a in member_containers[10].findAll('a'):
         name = str(a.contents[0])
-        name = name.replace('&nbsp;', ' ').replace('&raquo;', '')
         name = name.lstrip().rstrip()
         members.append('"' + name + '"')
 
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics]
+# Senate Committee on Environment and Public Works
+# TODO
+
+def comm_senate_energy():
+    members = ['"Senate Committee on Energy and Natural Resources"', '"SSEG"']
+    page = urllib2.urlopen('http://energy.senate.gov/public/index.cfm?FuseAction=About.Members')
+    soup = BeautifulSoup(page)
+
+    member_containers = soup.findAll('td', 'vblack11')[4:]
+
+    for m in member_containers:
+        a = m.find('a')
+        name = str(a.contents[0])
+        name = name.replace('Chairman ', '')
+        name = name.replace(' (I)', '')
+        name = name.lstrip().rstrip()
+        members.append('"' + name + '"')
+
+    return ', '.join(members) + '\n'
+
+#tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy]
 
 for t in tasks:
     print t(),

@@ -1557,9 +1557,54 @@ def comm_senate_appropriations():
         name = str(strong.contents[0])
         members.append('"' + name + '"')
 
-    return ', '.join(members) + '\n'    
+    return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations]
+def subcomm_senate_appropriations():
+    def parse_members(url, title, name, shortname):
+        members = ['"' + title + '/' + name + '"', '"' + shortname + '"']
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        member_containers = soup.findAll('div', 'CS_Textblock_Text')
+
+        container = member_containers[1]
+        for m in container.findAll('a'):
+            name = str(m.contents[0])
+            name = name.replace('Senator ', '')
+            paren_pos = name.find(' (')
+            name = name[:paren_pos]
+            members.append('"' + name + '"')
+        return ', '.join(members)
+
+    title = 'Senate Committee on Appropriations'
+    member_string = ''
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-agriculture.cfm', title, 'Subcommittee on Agriculture, Rural Development, Food and Drug Administration, and Related Agencies', 'SSAP_agr') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-commerce.cfm', title, 'Subcommittee on Commerce, Justice, and Science', 'SSAP_cjs') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-defense.cfm', title, 'Subcommittee on Defense', 'SSAP_def') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-financial.cfm', title, 'Subcommittee on Financial Services and General Government', 'SSAP_fin') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-energy.cfm', title, 'Subcommittee on Energy and Water Development', 'SSAP_ewd') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-homeland-security.cfm', title, 'Subcommittee on Homeland Security', 'SSAP_dhs') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-interior.cfm', title, 'Subcommittee on Interior and Related Agencies', 'SSAP_doi') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-labor.cfm', title, 'Subcommittee on Labor, Health and Human Services, and Education', 'SSAP_hhs') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-legislative.cfm', title, 'Subcommittee on Legislative Branch', 'SSAP_leg') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-military.cfm', title, 'Subcommittee on Military Construction and Veterans Affairs', 'SSAP_dva') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-state.cfm', title, 'Subcommittee on State, Foreign Operations, and Related Programs', 'SSAP_sta') + '\n'
+
+    member_string += parse_members('http://appropriations.senate.gov/sc-transportation.cfm', title, 'Subcommittee on Transportation, Treasury, the Judiciary, Housing and Urban Development', 'SSAP_jud') + '\n'
+    
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations]
 
 for t in tasks:
     print t(),

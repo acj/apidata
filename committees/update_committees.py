@@ -1620,7 +1620,24 @@ def comm_senate_armedservices():
 
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices]
+#def subcomm_senate_armedservices():
+#   page = urllib2.urlopen('http://armed-services.senate.gov/scmembrs.htm')
+#
+# TODO: These pages don't include senators' first names.  We'll need to
+# cross-reference from the main committee membership list.
+
+def comm_senate_banking():
+    members = ['"Senate Committee on Banking, Housing, and Urban Affairs"', '"SSBK"']
+    page = urllib2.urlopen('http://banking.senate.gov/public/index.cfm?FuseAction=CommitteeInformation.Membership')
+    soup = BeautifulSoup(page)
+    member_containers = soup.find('tbody')
+    for m in member_containers.findAll('a', 'blueunder'):
+        name = str(m.contents[0])
+        members.append('"' + name + '"')
+
+    return ', '.join(members) + '\n'
+
+#tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking]
 
 for t in tasks:
     print t(),

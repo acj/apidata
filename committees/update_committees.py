@@ -1673,9 +1673,73 @@ def subcomm_senate_banking():
 
     member_string += parse_members('http://banking.senate.gov/public/index.cfm?Fuseaction=CommitteeInformation.Subcommittee&Subcommittee_ID=decb3c3c-2f60-49ae-ac2a-d82e1b912c9c', title, 'Subcommittee on Securities, Insurance, and Investment', 'SSBK_sii') + '\n'
 
-    return member_string    
+    return member_string
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking]
+def comm_senate_commerce():
+    members = ['"Senate Committee on Commerce, Science, and Transportation"', '"SSCM"']
+    page = urllib2.urlopen('http://commerce.senate.gov/public/index.cfm?p=CommitteeMembers')
+    soup = BeautifulSoup(page)
+    member_containers = soup.findAll('div', id='committeeMembers')
+    for m in member_containers:
+        alist = m.findAll('a', 'title')
+        for n in alist:
+            name = str(n.contents[0]).replace('Senator ', '')
+            members.append('"' + name.strip() + '"')
+
+    return ', '.join(members) + '\n'
+
+def subcomm_senate_commerce():
+    def parse_members(url, title, name, shortname):
+        members = ['"' + title + '/' + name + '"', '"' + shortname + '"']
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        member_container = soup.find('table', border='0')
+        tds = member_container.findAll('td', valign='top')
+        for td in tds:
+            names = None
+            ul = td.find('ul')
+            if ul != None:
+                names = []
+                for li in ul.findAll('li'):
+                    names.append(li.contents[0])
+            else:
+                plaintext = ''.join(td.findAll(text=True))
+                if plaintext.find('Republicans') != -1:
+                    continue
+                if plaintext.find('Democrats') != -1:
+                    continue
+                names = plaintext.split('&bull;')
+            for n in names:
+                n = n.replace('&nbsp;', ' ')
+                n = n.strip()
+                if n != '':
+                    n = n.replace(' - Ranking Member', '')
+                    n = n.replace(' - Chairman', '')
+                    n = n.replace(' - Chairwoman', '')
+                    members.append('"' + n + '"')
+
+        return ', '.join(members)
+
+    title = 'Senate Committee on Commerce, Science, and Transportation'
+    member_string = ''
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=AviationOperationsSafetyandSecurity', title, 'Subcommittee on Aviation Operations, Safety, and Security', 'SSCM_avi') + '\n'
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=CommunicationsTechnologyandtheInternet', title, 'Subcommittee on Communications, Technology, and the Internet', 'SSCM_cti') + '\n'
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=CompetitivenessInnovationandExportPromotion', title, 'Subcommittee on Competitiveness, Innovation, and Export Promotion', 'SSCM_cie') + '\n'
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=ConsumerProtectionProductSafetyandInsurance', title, 'Subcommittee on Consumer Protection, Product Safety, and Insurance', 'SSCM_cpi') + '\n'
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=OceansAtmosphereFisheriesandCoastGuard', title, 'Subcommittee on Oceans, Atmosphere, Fisheries, and Coast Guard', 'SSCM_oaf') + '\n'
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=ScienceandSpace', title, 'Subcommittee on Space and Science', 'SSCM_sas') + '\n'
+
+    member_string += parse_members('http://commerce.senate.gov/public/index.cfm?p=SurfaceTransportationandMerchantMarineInfrastructureSafetyandSecurity', title, 'Subcommittee on Surface Transportation and Merchant Marine Infrastructure, Safety, and Security', 'SSCM_stm') + '\n'
+
+    return member_string
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce]
 
 for t in tasks:
     print t(),

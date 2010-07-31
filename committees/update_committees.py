@@ -1637,7 +1637,45 @@ def comm_senate_banking():
 
     return ', '.join(members) + '\n'
 
-#tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking]
+def subcomm_senate_banking():
+    def parse_members(url, title, name, shortname):
+        members = ['"' + title + '/' + name + '"', '"' + shortname + '"']
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        member_containers = soup.findAll('td', 'vblack8', valign='top')
+
+        for m in member_containers:
+            plaintext = ''.join(m.findAll(text=True))
+            names = plaintext.split('\n')
+            names = [n.replace('\t', '') for n in names]
+            for n in names:
+                if n.find('Republic') != -1 or n.find('Democrat') != -1:
+                    continue
+                if n == '':
+                    continue
+                paren_pos = n.find(' (')
+                if paren_pos != -1:
+                    n = n[:paren_pos]
+                members.append('"' + n.strip() + '"')
+
+        return ', '.join(members)
+
+    title = 'Senate Committee on Banking, Housing, and Urban Affairs'
+    member_string = ''
+
+    member_string += parse_members('http://banking.senate.gov/public/index.cfm?Fuseaction=CommitteeInformation.Subcommittee&Subcommittee_ID=d2141d98-ccd0-439b-a59e-1967939d9679', title, 'Subcommittee on Economic Policy', 'SSBK_ecp') + '\n'
+
+    member_string += parse_members('http://banking.senate.gov/public/index.cfm?Fuseaction=CommitteeInformation.Subcommittee&Subcommittee_ID=e08628bc-d809-46c9-99f1-5bb8bead82bc', title, 'Subcommittee on Housing, Transportation, and Community Development', 'SSBK_htc') + '\n'
+
+    member_string += parse_members('http://banking.senate.gov/public/index.cfm?Fuseaction=CommitteeInformation.Subcommittee&Subcommittee_ID=d7d38747-f226-46f4-8aaa-c06fae94bf41', title, 'Subcommittee on Financial Institutions', 'SSBK_fin') + '\n'
+
+    member_string += parse_members('http://banking.senate.gov/public/index.cfm?Fuseaction=CommitteeInformation.Subcommittee&Subcommittee_ID=cc2adfc2-d906-4355-8c46-cf47138ee005', title, 'Subcommittee on Security and International Trade and Finance', 'SSAP_fin') + '\n'
+
+    member_string += parse_members('http://banking.senate.gov/public/index.cfm?Fuseaction=CommitteeInformation.Subcommittee&Subcommittee_ID=decb3c3c-2f60-49ae-ac2a-d82e1b912c9c', title, 'Subcommittee on Securities, Insurance, and Investment', 'SSBK_sii') + '\n'
+
+    return member_string    
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking]
 
 for t in tasks:
     print t(),

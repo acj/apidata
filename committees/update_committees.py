@@ -1757,7 +1757,30 @@ def comm_senate_budget():
 
     return ', '.join(members) + '\n'
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget]
+def comm_senate_judiciary():
+    members = ['"Senate Committee on the Judiciary"', '"SSJU"']
+    page = urllib2.urlopen('http://judiciary.senate.gov/about/members.cfm')
+    soup = BeautifulSoup(page)
+    div = soup.find('div', 'content')
+    member_containers = div.findAll('td')
+    for td in member_containers:
+        name = str(''.join(td.findAll(text=True)))
+        name = name.replace('Biography', '')
+        name = name.replace('Chairman,', '')
+        name = name.replace('Ranking Member,', '')
+        name = name.replace('\n', ' ').replace('\r', '').replace('&nbsp;', ' ')
+        party_pos = name.find(' D-')
+        if party_pos == -1:
+            party_pos = name.find(' R-')
+        name = name[:party_pos]
+        name = name.strip()
+
+        if name != '' and name.find('Committee membership') == -1:
+            members.append('"' + name + '"')
+
+    return ', '.join(members) + '\n'
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget, comm_senate_judiciary]
 
 for t in tasks:
     print t(),

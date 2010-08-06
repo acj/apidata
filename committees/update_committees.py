@@ -1833,8 +1833,22 @@ def comm_senate_rules():
 
     return ', '.join(members) + '\n'
 
+def comm_senate_sbc():
+    members = ['"Senate Committee on Small Business and Entrepreneurship"', '"SSRA"']
+    page = urllib2.urlopen('http://sbc.senate.gov/public/index.cfm?p=CommitteeMembers')
+    soup = BeautifulSoup(page)
+    div = soup.find('tbody')
+    member_containers = div.findAll('a')
+    for m in member_containers:
+        name = m.contents[0]
+        parenpos = name.find(' (')
+        name = name[:parenpos]
+        members.append('"' + name.strip() + '"')
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget, comm_senate_judiciary, subcomm_senate_judiciary, comm_senate_rules]
+    return ', '.join(members) + '\n'
+
+
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget, comm_senate_judiciary, subcomm_senate_judiciary, comm_senate_rules, comm_senate_sbc]
 
 for t in tasks:
     print t(),

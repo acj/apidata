@@ -54,9 +54,10 @@ def comm_appropriations():
     page = urllib2.urlopen("http://appropriations.house.gov/index.php?option=com_content&view=article&id=95&Itemid=138")
     soup = BeautifulSoup(page)
     members = ['"House Committee on Appropriations"', '"HSAP"']
-    memberlist = soup.find('table')
+    memberlist = soup.find('table', cellpadding='10', border='0')
     for member in memberlist.findAll('a'):
         comma_idx = member.contents[0].find(',')
+        print '"' + member.contents[0][:comma_idx] + '"'
         members.append('"' + member.contents[0][:comma_idx] + '"')
         
     return ', '.join(members) + '\n'
@@ -66,13 +67,21 @@ def subcomm_appropriations():
         page = urllib2.urlopen(url)
         soup = BeautifulSoup(page)
         members = ['"' + subcomm_name + '", "' + shortname + '"']
-        memberlist = soup.find('div', id='MembersList')
-        paras = memberlist.findAll('p')
-        names = str(paras[1]) + str(paras[3])
-        names = names.replace('Chair:', '')
-        re_names = re.compile(r'([A-Z][a-z]+.*) \([A-Z][A-Z]\).*')
+        memberlist = soup.find('div', 'moduletable_members')
+        paras = memberlist.findAll('li')
         
-        for name in re_names.findall(names):
+        #names = str(paras[1]) + str(paras[3])
+        #names = names.replace('Chair:', '')
+        #re_names = re.compile(r'([A-Z][a-z]+.*) \([A-Z][A-Z]\).*')
+        
+        #for name in re_names.findall(names):
+        #    members.append('"' + name + '"')
+
+        for p in paras:
+            name = p.contents[0]
+            name = name.replace('Chair:', '')
+            parenpos = name.find(' (')
+            name = name[:parenpos]
             members.append('"' + name + '"')
         return members
     
@@ -1985,7 +1994,8 @@ for t in tasks:
     try:
         comm = t()
         FILE.write(comm)
-    except:
+    except Exception, e:
         print 'Problem with ' + str(t)
+        #print e
 
 FILE.close()

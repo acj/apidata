@@ -51,7 +51,7 @@ def subcomm_agriculture():
     return subcommittees
 
 def comm_appropriations():
-    page = urllib2.urlopen("http://appropriations.house.gov/members111th.shtml")
+    page = urllib2.urlopen("http://appropriations.house.gov/index.php?option=com_content&view=article&id=95&Itemid=138")
     soup = BeautifulSoup(page)
     members = ['"House Committee on Appropriations"', '"HSAP"']
     memberlist = soup.find('table')
@@ -77,29 +77,29 @@ def subcomm_appropriations():
         return members
     
     subcommittees = ''
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Agriculture, Rural Development, Food and Drug Administration, and Related Agencies', 'HSAP_fda', 'http://appropriations.house.gov/Subcommittees/sub_ardf.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Agriculture, Rural Development, Food and Drug Administration, and Related Agencies', 'HSAP_fda', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=85&Itemid=16')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Commerce, Justice, Science, and Related Agencies', 'HSAP_com', 'http://appropriations.house.gov/Subcommittees/sub_cjs.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Commerce, Justice, Science, and Related Agencies', 'HSAP_com', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=84&Itemid=17')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Defense', 'HSAP_def', 'http://appropriations.house.gov/Subcommittees/sub_def.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Defense', 'HSAP_def', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=83&Itemid=18')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Energy and Water Development', 'HSAP_ene', 'http://appropriations.house.gov/Subcommittees/sub_ew.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Energy and Water Development', 'HSAP_ene', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=82&Itemid=19')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Financial Services and General Government', 'HSAP_fin', 'http://appropriations.house.gov/Subcommittees/sub_fsdc.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Financial Services and General Government', 'HSAP_fin', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=15&Itemid=20')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Homeland Security', 'HSAP_dhs', 'http://appropriations.house.gov/Subcommittees/sub_dhs.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Homeland Security', 'HSAP_dhs', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=88&Itemid=21')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Interior, Environment, and Related Agencies', 'HSAP_doi', 'http://appropriations.house.gov/Subcommittees/sub_ienv.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Interior, Environment, and Related Agencies', 'HSAP_doi', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=86&Itemid=22')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Labor, Health and Human Services, Education, and Related Agencies', 'HSAP_hhs', 'http://appropriations.house.gov/Subcommittees/sub_lhhse.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Labor, Health and Human Services, Education, and Related Agencies', 'HSAP_hhs', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=87&Itemid=23')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Legislative Branch', 'HSAP_leg', 'http://appropriations.house.gov/Subcommittees/sub_leg.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Legislative Branch', 'HSAP_leg', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=79&Itemid=24')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Military Construction, Veterans Affairs, and Related Agencies, VA', 'HSAP_dva', 'http://appropriations.house.gov/Subcommittees/sub_mivet.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Military Construction, Veterans Affairs, and Related Agencies, VA', 'HSAP_dva', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=78&Itemid=25')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on State, Foreign Operations, and Related Programs', 'HSAP_sta', 'http://appropriations.house.gov/Subcommittees/sub_sfo.shtml')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on State, Foreign Operations, and Related Programs', 'HSAP_sta', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=77&Itemid=26')) + '\n'
 
-    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Transportation, Housing and Urban Development, and Related Agencies', 'HSAP_hud', 'http://appropriations.house.gov/Subcommittees/sub_tranurb.shtml'))
+    subcommittees += ', '.join(parse_members('House Committee on Appropriations/Subcommittee on Transportation, Housing and Urban Development, and Related Agencies', 'HSAP_hud', 'http://appropriations.house.gov/index.php?option=com_content&view=article&id=81&Itemid=27'))
 
     return subcommittees + '\n'
 
@@ -1860,6 +1860,20 @@ def comm_senate_veterans():
 
     return ', '.join(members) + '\n'
 
+def comm_senate_intel():
+    members = ['"Senate Committee on Intelligence"', '"SLIN"']
+    page = urllib2.urlopen('http://intelligence.senate.gov/memberscurrent.html')
+    soup = BeautifulSoup(page)
+    member_containers = soup.findAll('a', 'bodyLink')
+    for m in member_containers:
+        if len(m.contents) == 0:
+            continue
+        name = m.contents[0]
+        name = name[:-1]
+        members.append('"' + name.strip() + '"')
+
+    return ', '.join(members) + '\n'
+
 def comm_senate_aging():
     members = ['"Senate Special Committee on Aging"', '"SPAG"']
     page = urllib2.urlopen('http://aging.senate.gov/about/members.cfm')
@@ -1965,5 +1979,13 @@ def comm_senate_indian():
 
 tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget, comm_senate_judiciary, subcomm_senate_judiciary, comm_senate_rules, comm_senate_sbc, comm_senate_veterans, comm_senate_aging, comm_senate_intel, comm_joint_econ, comm_joint_library, comm_joint_taxation, comm_joint_printing, comm_senate_indian]
 
+FILE = open('committees.csv', 'w')
+
 for t in tasks:
-    print t(),
+    try:
+        comm = t()
+        FILE.write(comm)
+    except:
+        print 'Problem with ' + str(t)
+
+FILE.close()

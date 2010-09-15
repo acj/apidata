@@ -9,6 +9,30 @@ import re
 import urllib2
 from BeautifulSoup import BeautifulSoup, Comment, Tag
 
+def fetch_senate_members_list():
+    url = 'http://en.wikipedia.org/wiki/List_of_current_United_States_Senators'
+    user_agent = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
+    headers = {'User-Agent' : user_agent}
+    req = urllib2.Request(url, None, headers)
+    page = urllib2.urlopen(req).read()
+    soup = BeautifulSoup(page)
+    members = {}
+    table = soup.find('table', 'sortable wikitable')
+    for span in table.findAll('span', 'fn'):
+        name = span.find('a').contents[0]
+        comma_pos = name.rfind(',')
+        space_pos = None
+        if comma_pos != -1:
+            space_pos = name[:comma_pos].rfind(' ')
+            members[name[space_pos:comma_pos]] = name
+        else:
+            space_pos = name.rfind(' ')
+            members[name[space_pos:]] = name
+
+    return members
+
+senators = fetch_senate_members_list()
+
 def comm_agriculture():
     members = ['"House Committee on Agriculture"', '"HSAG"']
     page = urllib2.urlopen("http://agriculture.house.gov/inside/members.html")
@@ -57,7 +81,6 @@ def comm_appropriations():
     memberlist = soup.find('table', cellpadding='10', border='0')
     for member in memberlist.findAll('a'):
         comma_idx = member.contents[0].find(',')
-        print '"' + member.contents[0][:comma_idx] + '"'
         members.append('"' + member.contents[0][:comma_idx] + '"')
         
     return ', '.join(members) + '\n'
@@ -176,12 +199,14 @@ def comm_edlabor():
     page = urllib2.urlopen("http://edlabor.house.gov/about/members/")
     soup = BeautifulSoup(page)
     members = ['"House Committee on Education and Labor"', '"HSED"']
-    lists = soup.find('div', 'page-asset asset')
-    listitems = lists.findAll('li')
-    for lst in listitems:
-        name = lst.find('a').contents[0]
-        name = name.replace('"', '\\"')
-        members.append('"' + name.replace(', Chairman', '') + '"')
+    for list in soup.findAll('ul', style='margin-top: 0px;'): 
+        for lst in list.findAll('li'):
+            a_tag = lst.find('a')
+            if a_tag == None:
+                continue
+            name = a_tag.contents[0]
+            name = name.replace('"', '\\"')
+            members.append('"' + name.replace(', Chairman', '') + '"')
     return ', '.join(members) + '\n'
 
 def subcomm_edlabor():
@@ -194,7 +219,10 @@ def subcomm_edlabor():
         members = ['"' + subcomm + '"', '"' + shortname + '"']    
         names = table.findAll('td')
         for name in names:
-            n = str(name.contents[0]).replace('"', '\\"')
+            n = name.find(text=True)
+            if n == None:
+                continue
+            n = n.replace('"', '\\"')
             if n.find('Democrats') != -1 or n.find('Republicans') != -1:
                 continue
             if n == '<br />':
@@ -279,10 +307,10 @@ def subcomm_energycommerce():
     return member_string
 
 def comm_financialservices():
-    page = urllib2.urlopen("http://financialservices.house.gov/members.html")
+    page = urllib2.urlopen('http://financialservices.house.gov/singlepages.aspx?NewsID=397')
     soup = BeautifulSoup(page)
     members = ['"House Committee on on Financial Services"', '"HSBA"']
-    lists = soup.find('div', 'bodytext')
+    lists = soup.find('tbody')
     listitems = lists.findAll('a')
     for lst in listitems:
         name = str(lst.contents[0])
@@ -307,29 +335,29 @@ def subcomm_financialservices():
                         names.append('"' + name + '"')
         return names
 
-    page = urllib2.urlopen("http://financialservices.house.gov/subassignments.html")
+    page = urllib2.urlopen('http://financialservices.house.gov/singlepages.aspx?NewsID=400')
     soup = BeautifulSoup(page)
     member_string = ''
     members = ['"House Committee on Financial Services"', '"HSBA"']
     tables = soup.findAll('table')
 
     # Capital Markets, Insurance, and Government Sponsored Enterprises
-    member_string += ', '.join(extract_names(tables[4], 'Subcommittee on Capital Markets, Insurance, and Government Sponsored Enterprises', 'HSBA_cap')) + '\n'
+    member_string += ', '.join(extract_names(tables[0], 'Subcommittee on Capital Markets, Insurance, and Government Sponsored Enterprises', 'HSBA_cap')) + '\n'
 
     # Financial Institutions and Consumer Credit
-    member_string += ', '.join(extract_names(tables[5], 'Subcommittee on Financial Institutions and Consumer Credit', 'HSBA_fic')) + '\n'
+    member_string += ', '.join(extract_names(tables[1], 'Subcommittee on Financial Institutions and Consumer Credit', 'HSBA_fic')) + '\n'
 
     # Housing and Community Opportunity
-    member_string += ', '.join(extract_names(tables[6], 'Subcommittee on Housing and Community Opportunity', 'HSBA_hco')) + '\n'
+    member_string += ', '.join(extract_names(tables[2], 'Subcommittee on Housing and Community Opportunity', 'HSBA_hco')) + '\n'
 
     # Domestic Monetary Policy and Technology
-    member_string += ', '.join(extract_names(tables[7], 'Subcommittee on Domestic Monetary Policy and Technology', 'HSBA_dmp')) + '\n'
+    member_string += ', '.join(extract_names(tables[3], 'Subcommittee on Domestic Monetary Policy and Technology', 'HSBA_dmp')) + '\n'
 
     # International Monetary Policy and Trade
-    member_string += ', '.join(extract_names(tables[8], 'Subcommittee on International Monetary Policy and Trade', 'HSBA_imp')) + '\n'
+    member_string += ', '.join(extract_names(tables[4], 'Subcommittee on International Monetary Policy and Trade', 'HSBA_imp')) + '\n'
 
     # Oversight and Investigations
-    member_string += ', '.join(extract_names(tables[9], 'Subcommittee on Oversight and Investigations', 'HSBA_osi')) + '\n'
+    member_string += ', '.join(extract_names(tables[5], 'Subcommittee on Oversight and Investigations', 'HSBA_osi')) + '\n'
 
     return member_string
 
@@ -538,21 +566,31 @@ def subcomm_waysandmeans():
     return member_string
 
 def comm_transportation():
-    page = urllib2.urlopen('http://transportation.house.gov/about.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/singlepages/singlepages.aspx/about')
     soup = BeautifulSoup(page)
     members = ['"House Committee on Transportation and Infrastructure"', '"HSPW"']
     # Pull the chairperson first
-    name = str(soup.findAll('p', align='center')[1].find('strong').contents[0])
+    name = str(soup.findAll('h5')[1].contents[0])
     members.append('"' + name[:name.find(',')] + '"')
 
-    member_container = soup.find('tbody')
-    for tag in member_container.findAll('li'):
+    div = soup.find('div', 'aboutLeft')
+    for tag in div.findAll('li'):
         name = tag.contents[0]
         commapos = name.find(',')
         name = name[:commapos].replace('"', '\\"')
         if name == 'Vacancy':
             continue
         members.append('"' + name + '"')
+
+    div = soup.find('div', 'aboutRight')
+    for tag in div.findAll('li'):
+        name = tag.contents[0]
+        commapos = name.find(',')
+        name = name[:commapos].replace('"', '\\"')
+        if name == 'Vacancy':
+            continue
+        members.append('"' + name + '"')
+
     return ', '.join(members) + '\n'
 
 def subcomm_transportation():
@@ -560,34 +598,31 @@ def subcomm_transportation():
     title = 'House Committee on Transportation and Infrastructure'
 
     # Subcommittee on Aviation
-    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/aviation_members.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/aviation.aspx')
     soup = BeautifulSoup(page)
     members = ['"' + title + '/Subcommittee on Aviation"', '"HSPW_air"']
     # Pull the chairperson first
-    name = str(soup.find('p', align='center').find('strong').contents[0])
-    members.append('"' + name[:name.find(',')] + '"')
+    name = str(soup.find('h3', 'boxName').contents[0])
+    members.append('"' + name[:name.find(',')].replace('&quot;', '\\"') + '"')
 
-    member_container = soup.find('tbody')
-    for tag in member_container.findAll('td'):
-        subtag = str(tag.contents[1])
-        for protoname in subtag.split('<br />'):
-            commapos = protoname.find(',')
-            if commapos == -1:
-                continue
-            name = protoname[:commapos]
-            name = name.replace('<em>', '').replace('</em>', '')
-            name = name.replace('<br />', '').replace('<p>', '')
-            members.append('"' + name.strip() + '"')
+    member_container = soup.find('div', 'left')
+    for tag in member_container.findAll('p'):
+        protoname = tag.contents[0]
+        commapos = protoname.find(',')
+        if commapos == -1:
+            continue
+        name = protoname[:commapos]
+        members.append('"' + name.strip().replace('&quot;', '\\"') + '"')
 
     member_string += ', '.join(members) + '\n'
 
     # Subcommittee on Coast Guard and Maritime Transportation
-    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/maritime_transportation_members.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/maritime_transportation.aspx')
     soup = BeautifulSoup(page)
     members = ['"' + title + '/Subcommittee on Coast Guard and Maritime Transportation"', '"HSPW_sea"']
     # Pull the chairperson first
-    name = str(soup.findAll('p', align='left')[1].find('strong').contents[0])
-    members.append('"' + name[:name.find(',')] + '"')
+    name = str(soup.find('h3', 'boxName').contents[0])
+    members.append('"' + name[:name.find(',')].replace('&quot;', '\\"') + '"')
 
     member_container = soup.findAll('td', valign='top')
     for tag in member_container:
@@ -599,18 +634,18 @@ def subcomm_transportation():
             name = protoname[:commapos]
             name = name.replace('<em>', '').replace('</em>', '')
             name = name.replace('<br />', '').replace('<p>', '')
-            members.append('"' + name.strip() + '"')
+            members.append('"' + name.strip().replace('&quot;', '\\"') + '"')
 
     member_string += ', '.join(members) + '\n'
 
     # Subcommittee on Economic Development, Public Buildings, and
     # Emergency Management
-    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/economic_members.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/economic.aspx')
     soup = BeautifulSoup(page)
     members = ['"' + title + '/Subcommittee on Economic Development, Public Buildings, and Emergency Management"', '"HSPW_ecn"']
     # Pull the chairperson first
-    name = str(soup.find('div', id='content').find('strong').contents[0])
-    members.append('"' + name[:name.find(',')] + '"')
+    name = str(soup.find('h3', 'boxName').contents[0])
+    members.append('"' + name[:name.find(',')].replace('&quot;', '\\"') + '"')
 
     member_container = soup.findAll('td', valign='top')
     for tag in member_container:
@@ -623,17 +658,17 @@ def subcomm_transportation():
             name = name.replace('<em>', '').replace('</em>', '')
             name = name.replace('<br />', '').replace('<p>', '')
             name = name.replace('"', '\\"')
-            members.append('"' + name.strip() + '"')
+            members.append('"' + name.strip().replace('&quot;', '\\"') + '"')
 
     member_string += ', '.join(members) + '\n'
 
     # Subcommittee on Highways and Transit
-    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/highways_transit_members.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/highways_transit.aspx')
     soup = BeautifulSoup(page)
     members = ['"' + title + '/Subcommittee on Highways and Transit"', '"HSPW_hwy"']
     # Pull the chairperson first
-    name = str(soup.find('p', align='center').find('strong').contents[0])
-    members.append('"' + name[:name.find(',')] + '"')
+    name = str(soup.find('h3', 'boxName').contents[0])
+    members.append('"' + name[:name.find(',')].replace('&quot;', '\\"') + '"')
 
     member_container = soup.findAll('td', valign='top')
     for tag in member_container:
@@ -646,17 +681,17 @@ def subcomm_transportation():
             name = name.replace('<em>', '').replace('</em>', '')
             name = name.replace('<br />', '').replace('<p>', '')
             name = name.replace('"', '\\"')
-            members.append('"' + name.strip() + '"')
+            members.append('"' + name.strip().replace('&quot;', '\\"') + '"')
 
     member_string += ', '.join(members) + '\n'
 
     # Subcommittee on Railroads, Pipelines, and Hazardous Materials
-    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/railroads_pipelines_members.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/railroads_pipelines.aspx')
     soup = BeautifulSoup(page)
     members = ['"' + title + '/Subcommittee on Railroads, Pipelines, and Hazardous Materials"', '"HSPW_rrd"']
     # Pull the chairperson first
-    name = str(soup.find('p', align='center').find('strong').contents[0])
-    members.append('"' + name[:name.find(',')] + '"')
+    name = str(soup.find('h3', 'boxName').contents[0])
+    members.append('"' + name[:name.find(',')].replace('&quot;', '\\"') + '"')
 
     member_container = soup.findAll('td', valign='top')
     for tag in member_container:
@@ -669,17 +704,17 @@ def subcomm_transportation():
             name = name.replace('<em>', '').replace('</em>', '')
             name = name.replace('<br />', '').replace('<p>', '')
             name = name.replace('"', '\\"')
-            members.append('"' + name.strip() + '"')
+            members.append('"' + name.strip().replace('&quot;', '\\"') + '"')
 
     member_string += ', '.join(members) + '\n'
 
     # Subcommittee on Water Resources and Environment
-    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/WaterResources_members.aspx')
+    page = urllib2.urlopen('http://transportation.house.gov/subcommittees/WaterResources.aspx')
     soup = BeautifulSoup(page)
     members = ['"' + title + '/Subcommittee on Water Resources and Environment"', '"HSPW_wre"']
     # Pull the chairperson first
-    name = str(soup.find('p', align='center').find('strong').contents[0])
-    members.append('"' + name[:name.find(',')] + '"')
+    name = str(soup.find('h3', 'boxName').contents[0])
+    members.append('"' + name[:name.find(',')].replace('&quot;', '\\"') + '"')
 
     member_container = soup.findAll('td', valign='top')
     for tag in member_container:
@@ -692,7 +727,7 @@ def subcomm_transportation():
             name = name.replace('<em>', '').replace('</em>', '')
             name = name.replace('<br />', '').replace('<p>', '')
             name = name.replace('"', '\\"')
-            members.append('"' + name.strip() + '"')
+            members.append('"' + name.strip().replace('&quot;', '\\"') + '"')
 
     member_string += ', '.join(members) + '\n'
 
@@ -1273,12 +1308,16 @@ def comm_foreign():
     page = urllib2.urlopen('http://foreign.senate.gov')
     soup = BeautifulSoup(page)
 
-    member_container = soup.find('div', id='democrats')
+    member_container = soup.find('div', id='majority-party')
     for m in member_container.findAll('div'):
-        members.append('"' + m.contents[0] + '"')
-    member_container = soup.find('div', id='republicans')
+        name = m.find('a').contents[0]
+        name = name.replace('&nbsp;', ' ')
+        members.append('"' + name + '"')
+    member_container = soup.find('div', id='minority-party')
     for m in member_container.findAll('div'):
-        members.append('"' + m.contents[0] + '"')
+        name = m.find('a').contents[0]
+        name = name.replace('&nbsp;', ' ')
+        members.append('"' + name + '"')
 
     return ', '.join(members) + '\n'
 
@@ -1477,8 +1516,22 @@ def comm_senate_ethics():
 
     return ', '.join(members) + '\n'
 
-# Senate Committee on Environment and Public Works
-# TODO
+def comm_senate_epw():
+    members = ['"Senate Committee on Environment and Public Works"', '"SSEV"']
+    page = urllib2.urlopen('http://epw.senate.gov/public/index.cfm?FuseAction=Members.Home')
+    soup = BeautifulSoup(page)
+
+    member_containers = soup.findAll('div', style='float:left; margin:20px 10px;')
+
+    for m in member_containers:
+        for a in m.findAll('a'):
+            name = str(a.contents[0])
+            name = name.lstrip().rstrip()
+            members.append('"' + name + '"')
+
+    return ', '.join(members) + '\n'
+
+# TODO: subcomm_senate_epw
 
 def comm_senate_energy():
     members = ['"Senate Committee on Energy and Natural Resources"', '"SSEG"']
@@ -1629,9 +1682,36 @@ def comm_senate_armedservices():
 
     return ', '.join(members) + '\n'
 
-#def subcomm_senate_armedservices():
-#   page = urllib2.urlopen('http://armed-services.senate.gov/scmembrs.htm')
-#
+def subcomm_senate_armedservices():
+    def parse_members(table, title, name, shortname):
+        members = ['"' + title + '/' + name + '"', '"' + shortname + '"']
+        tr = table.findAll('tr')[1]
+        for td in tr.findAll('td')[1:]:
+            names_text = [str(c) for c in td.contents]
+            names_text = ''.join(names_text)
+            names = names_text.split('<br />')
+            for n in names:
+                space_pos = n.find(' (')
+                if n[:space_pos] != '':
+                    members.append('"' + n[:space_pos] + '"')
+        return members
+
+    title = 'Senate Committee on Armed Services'
+    page = urllib2.urlopen('http://www.senate.gov/general/committee_membership/committee_memberships_SSAS.htm')
+    soup = BeautifulSoup(page)
+    tables = soup.findAll('table', 'contenttext', width='100%')
+
+    member_string = ''
+
+    member_string += ', '.join(parse_members(tables[3], title, 'Subcommittee on Airland', 'SSAS_air')) + '\n'
+    member_string += ', '.join(parse_members(tables[5], title, 'Subcommittee on Emerging Threats and Capabilities', 'SSAS_thr')) + '\n'
+    member_string += ', '.join(parse_members(tables[7], title, 'Subcommittee on Personnel', 'SSAS_per')) + '\n'
+    member_string += ', '.join(parse_members(tables[9], title, 'Subcommittee on Readiness and Management Support', 'SSAS_rdi')) + '\n'
+    member_string += ', '.join(parse_members(tables[3], title, 'Subcommittee on Seapower', 'SSAS_sea')) + '\n'
+    member_string += ', '.join(parse_members(tables[3], title, 'Subcommittee on Strategic Forces', 'SSAS_sfs')) + '\n'
+
+    return member_string
+
 # TODO: These pages don't include senators' first names.  We'll need to
 # cross-reference from the main committee membership list.
 
@@ -1986,7 +2066,7 @@ def comm_senate_indian():
     return ', '.join(members) + '\n'
 
 
-tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget, comm_senate_judiciary, subcomm_senate_judiciary, comm_senate_rules, comm_senate_sbc, comm_senate_veterans, comm_senate_aging, comm_senate_intel, comm_joint_econ, comm_joint_library, comm_joint_taxation, comm_joint_printing, comm_senate_indian]
+tasks = [comm_agriculture, subcomm_agriculture, comm_appropriations, subcomm_appropriations, comm_armedservices, subcomm_armedservices, comm_budget, comm_edlabor, subcomm_edlabor, comm_energycommerce, subcomm_energycommerce, comm_financialservices, subcomm_financialservices, comm_foreignaffairs, subcomm_foreignaffairs, comm_energygw, comm_permanentintel, comm_rules, comm_veterans, comm_waysandmeans, subcomm_waysandmeans, comm_transportation, subcomm_transportation, comm_smallbusiness, subcomm_smallbusiness, comm_science, subcomm_hsc, comm_cha, comm_natres, comm_oversight, subcomm_oversight, comm_homelandsecurity, comm_help, comm_foreign, subcomm_foreign, comm_senate_finance, subcomm_senate_finance, comm_senate_epw, comm_senate_ethics, comm_senate_energy, subcomm_senate_energy, comm_senate_ag, comm_senate_appropriations, subcomm_senate_appropriations, comm_senate_armedservices, subcomm_senate_armedservices, comm_senate_banking, subcomm_senate_banking, comm_senate_commerce, subcomm_senate_commerce, comm_senate_budget, comm_senate_judiciary, subcomm_senate_judiciary, comm_senate_rules, comm_senate_sbc, comm_senate_veterans, comm_senate_aging, comm_senate_intel, comm_joint_econ, comm_joint_library, comm_joint_taxation, comm_joint_printing, comm_senate_indian]
 
 FILE = open('committees.csv', 'w')
 

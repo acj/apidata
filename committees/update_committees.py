@@ -139,13 +139,17 @@ def comm_armedservices():
     page = urllib2.urlopen("http://armedservices.house.gov/list_of_members.shtml")
     soup = BeautifulSoup(page)
     members = ['"House Committee on Armed Services"', '"HSAS"']
-    memberlist = soup.find('div', align='center')
+    memberlist = soup.findAll('div', align='center')[4]
     for member in memberlist.findAll('a'):
         atag = member.find('span')
         if atag == None:
             atag = member.find('font') # Correct for html error
+            if atag == None:
+                continue
         comma_idx = atag.contents[0].find(',')
-        members.append('"' + atag.contents[0][:comma_idx] + '"')
+        name = atag.contents[0][:comma_idx]
+        name = name.replace('&ldquo;', '\\"').replace('&rdquo;', '\\"')
+        members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
 def subcomm_armedservices():
@@ -256,7 +260,10 @@ def comm_energycommerce():
     for lst in listitems:
         if len(lst.contents) < 1:
             continue
-        name = str(lst.contents[0])
+        ptag = lst.find('p')
+        if ptag == None:
+            continue
+        name = str(ptag.contents[0])
         if name == ' ':
             continue
         comma_pos = name.find(',')
@@ -327,12 +334,10 @@ def subcomm_financialservices():
 
         listitems = tag.findAll('td')
         for lst in listitems:
-            paras = lst.findAll('p')
-            for p in paras:
-                re_names = re.compile(r'Rep.\s+([^\n]+) \([A-Z][A-Z]\).*')
-                for c in tag.contents:
-                    for name in re_names.findall(str(c)):
-                        names.append('"' + name + '"')
+            re_names = re.compile(r'Rep.\s+([^\n]+) \([A-Z][A-Z]\).*')
+            for c in tag.contents:
+                for name in re_names.findall(str(c)):
+                    names.append('"' + name + '"')
         return names
 
     page = urllib2.urlopen('http://financialservices.house.gov/singlepages.aspx?NewsID=400')
@@ -1168,31 +1173,31 @@ def subcomm_oversight():
         full_title += '"'
         members = [full_title, '"' + shortname + '"']
 
-        divs = container.findAll('div')
+        txt = str(container)
+        names = txt.split('<br />')
         
-        for div in divs:
-            inner_container = div
-            para = div.find('p')
-            if para != None:
-                inner_container = para
-            names = []
-            for n in inner_container:
-                name = str(n)
-                name = name.replace('<strong>', '').replace('</strong>', '')
-                name = name.replace(', Chairman', '')
-                name = name.replace('u\'', '').replace('\\r', '')
-                name = name.replace('\'', '')
-                name = name.replace('\\n', '').replace('[', '').replace(']', '')
-                if name == '<br />' or name == ' ':
-                    continue
-                elif name == 'Majority' or name == 'Minority':
-                    continue
-                if name[0:2] == ', ':
-                    name = name[3:]
-                comma_pos = name.find(',')
-                if comma_pos > 1:
-                    name = name[:comma_pos]
-                members.append('"' + name.strip(' ') + '"')
+        for n in names:
+            name = str(n)
+            name = name.replace('<strong>', '').replace('</strong>', '')
+            name = name.replace(', Chairman', '')
+            name = name.replace('u\'', '').replace('\\r', '')
+            name = name.replace('\'', '')
+            name = name.replace('\\n', '').replace('[', '').replace(']', '')
+            name = name.replace('<p>Majority', '')
+            name = name.replace('<p>Minority', '')
+            name = name.replace('<p>', '').replace('</p>', '')
+            name = name.replace('<div>', '').replace('</div>', '')
+            if name == '<br />' or name == ' ' or name == '':
+                continue
+            elif name == 'Majority' or name == 'Minority':
+                continue
+            if name[0:2] == ', ':
+                name = name[2:]
+            comma_pos = name.find(',')
+            if comma_pos > 1:
+                name = name[:comma_pos]
+            name = name.replace('"', '\\"')
+            members.append('"' + name.strip(' ') + '"')
 
         return members
 
@@ -1203,20 +1208,21 @@ def subcomm_oversight():
 
     table = soup.findAll('table', 'contentpaneopen')[1]
     divs = table.findAll('div')
+    paras = table.findAll('p')
 
-    combined = BeautifulSoup(str(divs[1]) + str(divs[2]))
+    combined = BeautifulSoup(str(paras[1]) + '<br />' + str(divs[2]) + '<br />' + str(divs[3].contents[0]))
     member_string += ', '.join(extract_names(combined, 'Subcommittee on Domestic Policy', 'HSGO_dom')) + '\n'
 
-    combined = BeautifulSoup(str(divs[4]) + str(divs[5]))
+    combined = BeautifulSoup(str(paras[4]) + str(paras[5]))
     member_string += ', '.join(extract_names(combined, 'Subcommittee on Federal Workforce, Postal Services, and the District of Columbia', 'HSGO_fed')) + '\n'
 
-    combined = BeautifulSoup(str(divs[7]) + str(divs[8]))
+    combined = BeautifulSoup(str(paras[6]) + str(paras[7]))
     member_string += ', '.join(extract_names(combined, 'Subcommittee on Government Management, Organization, and Procurement', 'HSGO_gpo')) + '\n'
 
-    combined = BeautifulSoup(str(divs[10]) + str(divs[11]))
+    combined = BeautifulSoup(str(paras[8]) + str(paras[9]))
     member_string += ', '.join(extract_names(combined, 'Subcommittee on Information Policy, Census, and National Archives', 'HSGO_icn')) + '\n'
 
-    combined = BeautifulSoup(str(divs[12]) + '<div>' + str(table.find('td').contents[-19:]) + '</div>')
+    combined = BeautifulSoup(str(paras[10]) + '<br /> <div>' + str(table.find('td').contents[-21:]) + '</div>')
     member_string += ', '.join(extract_names(combined, 'Subcommittee on National Security and Foreign Affairs', 'HSGO_nsc')) + '\n'
 
     return member_string

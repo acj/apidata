@@ -41,37 +41,37 @@ def comm_agriculture():
     for list in memberlists:
         for member in list.findAll('li'):
             href = member.find('a')
-            members.append('"' + href.contents[0] + '"')
+            name = href.contents[0]
+            members.append('"' + name.rstrip(',') + '"')
 
     return ', '.join(members) + '\n'
 
-# TODO:
-#  * Need to handle/include the short names for these subcommittees
 def subcomm_agriculture():
+    def parse_members(subcomm_name, shortname, url):
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        members = ['"' + subcomm_name + '", "' + shortname + '"']
+        memberlist = soup.find('div', id='twoCol')
+        lst = memberlist.findAll('ul')
+        for ul in lst:
+            for li in ul.findAll('li'):
+                a = li.find('a')
+                name = a.contents[0]
+                members.append('"' + name + '"')
+        return members
+
     name_prefix = '"House Committee on Agriculture'
-    page = urllib2.urlopen("http://agriculture.house.gov/inside/subcomms.html")
+    page = urllib2.urlopen('http://agriculture.house.gov/singlepages.aspx?NewsID=3&LSBID=44')
     soup = BeautifulSoup(page)
-    committeelists = soup.findAll('table', 'sublist')
+
     subcommittees = ''
+    subcommittees += ', '.join(parse_members('House Committee on Agriculture/Subcommittee on Conservation, Credit, Energy, and Research', 'HSAG_ene', 'http://agriculture.house.gov/singlepages.aspx?NewsID=27&LSBID=44')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Agriculture/Subcommittee on Department Operations, Oversight, Nutrition, and Forestry', 'HSAG_for', 'http://agriculture.house.gov/singlepages.aspx?NewsID=29&LSBID=44')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Agriculture/Subcommittee on General Farm Commodities and Risk Management', 'HSAG_gfc', 'http://agriculture.house.gov/singlepages.aspx?NewsID=30&LSBID=44')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Agriculture/Subcommittee on Horticulture and Organic Agriculture', 'HSAG_bzz', 'http://agriculture.house.gov/singlepages.aspx?NewsID=31&LSBID=44')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Agriculture/Subcommittee on Livestock, Dairy, and Poultry', 'HSAG_ldp', 'http://agriculture.house.gov/singlepages.aspx?NewsID=32&LSBID=44')) + '\n'
+    subcommittees += ', '.join(parse_members('House Committee on Agriculture/Subcommittee on Rural Development, Biotechnology, Specialty Crops, and Foreign Agriculture', 'HSAG_bio', 'http://agriculture.house.gov/singlepages.aspx?NewsID=33&LSBID=44')) + '\n'
 
-    for list in committeelists:
-        members = []
-        summary = ''
-        if list.has_key('summary'):
-            summary = list['summary']
-        else:
-            # Handle the typo
-            if list.has_key('summmary'):
-                summary = list['summmary']
-            else:
-                continue
-
-        shortsummary = summary.replace('members of the ', '')
-        members.append(name_prefix + '/' + shortsummary + '"')
-        members.append('""') # TODO: Short name
-        for listitem in list.findAll('li'):
-            members.append('"' + listitem.find('a').contents[0] + '"')
-        subcommittees += ', '.join(members) + '\n'
     return subcommittees
 
 def comm_appropriations():
@@ -81,7 +81,8 @@ def comm_appropriations():
     memberlist = soup.find('table', cellpadding='10', border='0')
     for member in memberlist.findAll('a'):
         comma_idx = member.contents[0].find(',')
-        members.append('"' + member.contents[0][:comma_idx] + '"')
+        name = member.contents[0][:comma_idx]
+        members.append('"' + unicode(name).encode('utf-8') + '"')
         
     return ', '.join(members) + '\n'
 
@@ -105,7 +106,7 @@ def subcomm_appropriations():
             name = name.replace('Chair:', '')
             parenpos = name.find(' (')
             name = name[:parenpos]
-            members.append('"' + name + '"')
+            members.append('"' + unicode(name).encode('utf-8') + '"')
         return members
     
     subcommittees = ''
@@ -139,17 +140,20 @@ def comm_armedservices():
     page = urllib2.urlopen("http://armedservices.house.gov/list_of_members.shtml")
     soup = BeautifulSoup(page)
     members = ['"House Committee on Armed Services"', '"HSAS"']
-    memberlist = soup.findAll('div', align='center')[4]
-    for member in memberlist.findAll('a'):
-        atag = member.find('span')
-        if atag == None:
-            atag = member.find('font') # Correct for html error
+    for memberlist in soup.findAll('td'):
+        for p in memberlist.findAll('p'):
+            member = p.find('a')
+            if member == None:
+                break
+            atag = member.find('span')
             if atag == None:
-                continue
-        comma_idx = atag.contents[0].find(',')
-        name = atag.contents[0][:comma_idx]
-        name = name.replace('&ldquo;', '\\"').replace('&rdquo;', '\\"')
-        members.append('"' + name + '"')
+                atag = member.find('font') # Correct for html error
+                if atag == None:
+                    break
+            comma_idx = atag.contents[0].find(',')
+            name = atag.contents[0][:comma_idx]
+            name = name.replace('&ldquo;', '\\"').replace('&rdquo;', '\\"')
+            members.append('"' + name + '"')
     return ', '.join(members) + '\n'
 
 def subcomm_armedservices():
@@ -210,7 +214,8 @@ def comm_edlabor():
                 continue
             name = a_tag.contents[0]
             name = name.replace('"', '\\"')
-            members.append('"' + name.replace(', Chairman', '') + '"')
+            name = name.replace(', Chairman', '')
+            members.append('"' + unicode(name).encode('utf-8') + '"')
     return ', '.join(members) + '\n'
 
 def subcomm_edlabor():
@@ -220,18 +225,22 @@ def subcomm_edlabor():
     member_string = ''
 
     def parse_names(subcomm, shortname, table):
-        members = ['"' + subcomm + '"', '"' + shortname + '"']    
+        members = ['"' + 'House Committee on Education and Labor/' + subcomm + '"', '"' + shortname + '"']    
         names = table.findAll('td')
         for name in names:
-            n = name.find(text=True)
-            if n == None:
+            nametext = name.findAll(text=True)
+            if nametext == None or len(nametext) == 0:
                 continue
+            n = nametext[0]
             n = n.replace('"', '\\"')
             if n.find('Democrats') != -1 or n.find('Republicans') != -1:
                 continue
+            if n.find('Ranking Member') != -1:
+                continue
             if n == '<br />':
                 continue
-            members.append('"' + n.replace(',', '').strip() + '"')
+            n = n.replace(',', '').strip()
+            members.append('"' + unicode(n).encode('utf-8') + '"')
         return members
 
     # Early Childhood, Elementary, Secondary Ed
@@ -806,11 +815,13 @@ def subcomm_smallbusiness():
 
     return member_string
 
-# TODO: Need to replace 'Mr.' and 'Ms.' with appropriate first names in
-#       subcommittee lists.
 def comm_science():
     title = 'House Committee on Science and Technology'
+    name_dict = {}
     def extract_names(container, name, shortname):
+        build_dict = False
+        if len(name_dict) == 0:
+            build_dict = True
         full_title = '"' + title
         if name != '':
             full_title += '/' + name + '"'
@@ -823,8 +834,18 @@ def comm_science():
             if name.find('Res.') != -1:
                 continue
             name = name.rstrip(' ')
-            members.append('"' + name + '"')
+            # Change salutation to first name
+            shortname = name
+            if shortname[-4:] == ' Jr.':
+                shortname = shortname[:-4]
+            space_pos = shortname.rfind(' ') + 1
+            lname = shortname[space_pos:].title()
+            if name.find('Mr.') != -1 or name.find('Ms.') != -1 or name.find('Mrs.') != -1:
+                name = name_dict[lname]
+            if build_dict:
+                name_dict[lname.title()] = name.title()
 
+            members.append('"' + name.title() + '"')
         return members
 
     page = urllib2.urlopen('http://science.house.gov/about/members.shtml')
@@ -1537,7 +1558,32 @@ def comm_senate_epw():
 
     return ', '.join(members) + '\n'
 
-# TODO: subcomm_senate_epw
+def subcomm_senate_epw():
+    member_string = ''
+    title = 'Senate Committee on Environment and Public Works'
+
+    def parse_members(url, name, shortname):
+        members = [name, shortname]
+        page = urllib2.urlopen(url)
+        soup = BeautifulSoup(page)
+        for td in soup.findAll('td', 'vblack11'):
+            for a in td.findAll('a'):
+                name = a.contents[0]
+                if name == 'view':
+                    continue
+                members.append('"' + name + '"')
+
+        return ', '.join(members) + '\n'
+
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=1b27ff3f-4144-4365-b79c-dccdc4fc8824', '"' + title + '/Subcommittee on Children\'s Health"', '"SSEV_kid"')
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=d14466c0-a1b6-4c11-b87b-63700f7c3952', '"' + title + '/Subcommittee on Clean Air and Public Works"', '"SSEV_air"')
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=61c82caf-9dca-46c0-93b3-c7f602cc2e48', '"' + title + '/Subcommittee on Green Jobs and the New Economy"', '"SSEV_grn"')
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=b138d617-0770-4f37-bbef-f98847de0743', '"' + title + '/Subcommittee on Oversight"', '"SSEV_osi"')
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=01dbc44f-664e-493f-a883-13b89b0f5cc3', '"' + title + '/Subcommittee on Superfund, Toxics and Environmental Health"', '"SSEV_tox"')
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=de065f92-7614-40a9-8e6f-190182ac174f', '"' + title + '/Subcommittee on Transportation and Infrastructure"', '"SSEV_trn"')
+    member_string += parse_members('http://epw.senate.gov/public/index.cfm?FuseAction=Subcommittees.Subcommittee&Subcommittee_id=47af17cb-6eeb-4fdc-b02d-0abb49d2eacb', '"' + title + '/Subcommittee on Water and Wildlife"', '"SSEV_wwf"')
+
+    return member_string
 
 def comm_senate_energy():
     members = ['"Senate Committee on Energy and Natural Resources"', '"SSEG"']
@@ -1623,7 +1669,7 @@ def comm_senate_appropriations():
         if strong == None:
             continue
         name = str(strong.contents[0])
-        members.append('"' + name + '"')
+        members.append('"' + name.title() + '"')
 
     return ', '.join(members) + '\n'
 
@@ -1717,9 +1763,6 @@ def subcomm_senate_armedservices():
     member_string += ', '.join(parse_members(tables[3], title, 'Subcommittee on Strategic Forces', 'SSAS_sfs')) + '\n'
 
     return member_string
-
-# TODO: These pages don't include senators' first names.  We'll need to
-# cross-reference from the main committee membership list.
 
 def comm_senate_banking():
     members = ['"Senate Committee on Banking, Housing, and Urban Affairs"', '"SSBK"']
